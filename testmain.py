@@ -11,17 +11,17 @@ import testdef
 frameWidth = 640
 frameHeight = 480
 global cap
-# cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
-# cap.set(3, frameWidth)
-# cap.set(4, frameHeight)
-# cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
-# cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
+cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
+cap.set(3, frameWidth)
+cap.set(4, frameHeight)
+cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
 
 #ttyAMA0
 
-code_cap = cv2.VideoCapture("/dev/code_video",cv2.CAP_V4L2)  
-# code_cap = cv2.VideoCapture(2,cv2.CAP_V4L2) 
+# code_cap = cv2.VideoCapture("/dev/code_video",cv2.CAP_V4L2)  
+code_cap = cv2.VideoCapture(2,cv2.CAP_V4L2) 
 code_cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
 code_cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
 
@@ -98,13 +98,14 @@ while True:
         cv2.destroyAllWindows()
         # time.sleep(3)
         print("close")
-        cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
-        # cap = cv2.VideoCapture(0,cv2.CAP_V4L2)
+        # cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
+        cap = cv2.VideoCapture(0,cv2.CAP_V4L2)
         cap.set(3, 640)
         cap.set(4, 480)
         cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
         cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
         cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
+        
 
         recv=b'st'
 
@@ -146,37 +147,37 @@ while True:
         print("line_flag===",line_flag,"move_flag===",move_flag)
         while not cap.isOpened():
             print("Not open colorcap")
-        if(line_cishu == 2 or line_cishu ==4):
-            while not line_flag:
-                theta,line_flag=testdef.detectLine(cap)
-                if line_flag ==0:
-                    testdef.sendMessage4(ser,theta)
-                    print("main li de theta:",theta)
-                elif line_flag==1:
-                    print("line_flag:",line_flag)
-                    # testdef.sendMessage(ser,39)
-                    # time.sleep(0.01)
-                    # testdef.sendMessage(ser,39)
-                    # time.sleep(0.01)
-                    testdef.sendMessage(ser,39)
-                    time.sleep(0.01)
-                    testdef.sendMessage(ser,40)
-                    # time.sleep(0.01)
-                    # testdef.sendMessage(ser,40)
-                    # time.sleep(0.01)
-                    # testdef.sendMessage(ser,40)
-                    # time.sleep(0.01)
-                    break
-        # cv2.destroyAllWindows()
+        # if(line_cishu == 2 or line_cishu ==4):
+        #     while not line_flag:
+        #         theta,line_flag=testdef.detectLine(cap)
+        #         if line_flag ==0:
+        #             testdef.sendMessage4(ser,theta)
+        #             print("main li de theta:",theta)
+        #         elif line_flag==1:
+        #             print("line_flag:",line_flag)
+        #             # testdef.sendMessage(ser,39)
+        #             # time.sleep(0.01)
+        #             # testdef.sendMessage(ser,39)
+        #             # time.sleep(0.01)
+        #             testdef.sendMessage(ser,39)
+        #             time.sleep(0.01)
+        #             testdef.sendMessage(ser,40)
+        #             # time.sleep(0.01)
+        #             # testdef.sendMessage(ser,40)
+        #             # time.sleep(0.01)
+        #             # testdef.sendMessage(ser,40)
+        #             # time.sleep(0.01)
+        #             break
+        # # cv2.destroyAllWindows()
         while not move_flag:
             recvv=testdef.receiveMessage(ser)
-            # print(recvv)
-            # if recvv!=None:
-            #     recv=b'st'
-            #     line_flag=0
-            #     print("recv=",recv,"line_flag=",line_flag)
-            #     print("outttttttttttttttttttttttttttttttttttt")
-            #     break
+            print(recvv)
+            if recvv!=None:
+                recv=b'st'
+                line_flag=0
+                print("recv=",recv,"line_flag=",line_flag)
+                print("outttttttttttttttttttttttttttttttttttt")
+                break
             recv0=testdef.receiveMessage(ser)
             for i in range(5):
                 detxq,detyq,move_dirq,move_flagq=testdef.findCountours(cap)
@@ -239,6 +240,8 @@ while True:
         while not cap.isOpened():
             print("Not open colorcap")
         while not line_flag:
+            # for i in range(5):
+            #     theta1,line_flag1=testdef.detectLine(cap)
             theta,line_flag=testdef.detectLine(cap)
             if line_flag ==0:
                 testdef.sendMessage4(ser,theta)

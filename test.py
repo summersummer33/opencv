@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+# import uvc
 
 
 # #��������ͷ��������
@@ -58,11 +59,13 @@ def undistortion(img, mtx, dist):   #jibian
 #     print("cant open")
 #     exit()
 
-# cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
-cap = cv2.VideoCapture(2,cv2.CAP_V4L2)
+cap = cv2.VideoCapture(0,cv2.CAP_V4L2)
+# cap = cv2.VideoCapture("/dev/code_video",cv2.CAP_V4L2)
+# cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('Y', 'U', 'Y', 'V'))
 # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-cap.set(3, 640)#��
-cap.set(4, 480)#��
+# cap.set(3, 640)#��
+# cap.set(4, 480)#��
 cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
 cap.set(cv2.CAP_PROP_EXPOSURE, float(0.6)) 
 

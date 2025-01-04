@@ -11,8 +11,8 @@ dim_red_min =   [  0, 60 ,60]
 dim_red_max =   [ 12,203, 255]
 dim_green_min = [45,60,60]# 60 60
 dim_green_max = [95,250,250]
-dim_blue_min =  [100,60,80]
-dim_blue_max =  [124,230,255]
+dim_blue_min =  [82,105,0]#100 60 80
+dim_blue_max =  [120,255,255]#124 230 255
 dim_red_min1 =   [  160, 50 ,50]
 dim_red_max1 =   [ 180,255, 255]
 
@@ -20,8 +20,10 @@ dim_red_max1 =   [ 180,255, 255]
 
 # x=40 y=34  zai gao de shi hou wangyoul x+,wangxial y-
 # 41 -20
-correct_x=42
-correct_y=16
+#42 16
+#67 -9
+correct_x=67
+correct_y=0
 
 npzfile = np.load('calibrate.npz')
 mtx = npzfile['mtx']

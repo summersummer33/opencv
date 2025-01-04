@@ -7,11 +7,12 @@ import serial
 
 frameWidth = 640
 frameHeight = 480
-cap = cv2.VideoCapture("/dev/up_video")
-# cap=cv2.VideoCapture(2)
-cap.set(3, frameWidth)
-cap.set(4, frameHeight)
-cap.set(10,150)
+cap = cv2.VideoCapture(0,cv2.CAP_V4L2)
+cap.set(3, 640)
+cap.set(4, 480)
+cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
 dim_red_min =   [  0, 133,68]
 dim_red_max =   [ 11,255, 255]
 dim_green_min = [44,51,0]# 60 60
