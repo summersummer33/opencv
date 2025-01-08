@@ -17,11 +17,11 @@ cap.set(10,150)
 
 cv2.namedWindow("TrackBars")
 cv2.resizeWindow("TrackBars",640,240)
-cv2.createTrackbar("Hue Min","TrackBars",100,179,empty)
-cv2.createTrackbar("Hue Max","TrackBars",124,179,empty)
-cv2.createTrackbar("Sat Min","TrackBars",60,255,empty)
-cv2.createTrackbar("Sat Max","TrackBars",230,255,empty)
-cv2.createTrackbar("Val Min","TrackBars",80,255,empty)
+cv2.createTrackbar("Hue Min","TrackBars",82,179,empty)
+cv2.createTrackbar("Hue Max","TrackBars",120,179,empty)
+cv2.createTrackbar("Sat Min","TrackBars",105,255,empty)
+cv2.createTrackbar("Sat Max","TrackBars",255,255,empty)
+cv2.createTrackbar("Val Min","TrackBars",0,255,empty)
 cv2.createTrackbar("Val Max","TrackBars",255,255,empty)
 
 while True:

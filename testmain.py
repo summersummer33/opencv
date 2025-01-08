@@ -17,6 +17,7 @@ cap.set(4, frameHeight)
 cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
 cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
 cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
 #ttyAMA0
 
@@ -43,6 +44,7 @@ get_order=[]
 put_order=[]
 line_flag=0
 move_flag=0
+move_flag_color=0
 # recv = '05'
 recv=''
 line_cishu =1
@@ -54,7 +56,7 @@ while True:
     if recv_mess != None:
         print("recv_mess:",recv_mess)
     if recv_mess != None:
-        if recv_mess == b'AA' or recv_mess==b'BB' or recv_mess==b'CC' or recv_mess==b'DD' or recv_mess==b'EE' or recv_mess==b'st':
+        if recv_mess == b'AA' or recv_mess==b'BB' or recv_mess==b'CC' or recv_mess==b'DD' or recv_mess==b'EE' or recv_mess==b'FF' or recv_mess==b'GG' or recv_mess==b'st':
             recv=recv_mess
     # print("first  recv:",recv)
     print(recv)
@@ -105,6 +107,7 @@ while True:
         cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
         cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
         cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
         
 
         recv=b'st'
@@ -148,26 +151,17 @@ while True:
         while not cap.isOpened():
             print("Not open colorcap")
         # if(line_cishu == 2 or line_cishu ==4):
-        #     while not line_flag:
-        #         theta,line_flag=testdef.detectLine(cap)
-        #         if line_flag ==0:
-        #             testdef.sendMessage4(ser,theta)
-        #             print("main li de theta:",theta)
-        #         elif line_flag==1:
-        #             print("line_flag:",line_flag)
-        #             # testdef.sendMessage(ser,39)
-        #             # time.sleep(0.01)
-        #             # testdef.sendMessage(ser,39)
-        #             # time.sleep(0.01)
-        #             testdef.sendMessage(ser,39)
-        #             time.sleep(0.01)
-        #             testdef.sendMessage(ser,40)
-        #             # time.sleep(0.01)
-        #             # testdef.sendMessage(ser,40)
-        #             # time.sleep(0.01)
-        #             # testdef.sendMessage(ser,40)
-        #             # time.sleep(0.01)
-        #             break
+        while not line_flag:
+            theta,line_flag=testdef.detectLine(cap)
+            if line_flag ==0:
+                testdef.sendMessage4(ser,theta)
+                print("main li de theta:",theta)
+            elif line_flag==1:
+                print("line_flag:",line_flag)
+                testdef.sendMessage(ser,39)
+                time.sleep(0.01)
+                testdef.sendMessage(ser,40)
+                break
         # # cv2.destroyAllWindows()
         while not move_flag:
             recvv=testdef.receiveMessage(ser)
@@ -264,6 +258,73 @@ while True:
         line_flag=0
         recv=b'st'
 
+    #only gray
+    elif recv==b'FF':
+        while not move_flag:
+            recvv=testdef.receiveMessage(ser)
+            # print(recvv)
+            if recvv!=None:
+                recv=b'st'
+                line_flag=0
+                print("recv=",recv,"line_flag=",line_flag)
+                print("outttttttttttttttttttttttttttttttttttt")
+                break
+            recv0=testdef.receiveMessage(ser)
+            for i in range(3):
+                # detxq,detyq,move_flagq=testdef.circlePut1(cap)
+                ret=cap.grab()
+            detx,dety,move_flag=testdef.circlePut1(cap)
+            if recv0 != None:
+                    print("00000000000recv0000:",recv0)
+            if move_flag==0:
+                testdef.sendMessage2(ser,detx,dety)
+            elif move_flag==1:                          
+                print("move_flag:",move_flag)
+                testdef.sendMessage(ser,57)
+                time.sleep(0.01)
+            
+                break
+        move_flag=0
+        line_flag=0
+        recv=b'st'
+        line_cishu+=1
+
+    #color+gray
+    elif recv==b'GG':
+        # while not move_flag_color:
+        while True:
+            print("iiiiiiiiiiinnnnnnnnnnnnnnnn")
+            for j in range(3):
+                ret=cap.grab()
+            x_,y_,img_,flag1,detx_p,dety_p = testdef.circlePut_color(cap,2)
+            if abs(detx_p)<12 and abs(dety_p)<12:
+                move_flag_color=1
+                break
+            else:
+                testdef.sendMessage2(ser,detx_p,dety_p)
+        move_flag_color=0
+        while not move_flag:
+            # recvv=testdef.receiveMessage(ser)
+            # print(recvv)
+            # if recvv!=None:
+            #     recv=b'st'
+            #     line_flag=0
+            #     print("recv=",recv,"line_flag=",line_flag)
+            #     print("outttttttttttttttttttttttttttttttttttt")
+            #     break
+            for j in range(3):
+                ret=cap.grab()
+            detx,dety,move_flag=testdef.circlePut1(cap)
+            if move_flag==0:
+                testdef.sendMessage2(ser,detx,dety)
+            elif move_flag==1:                          
+                print("move_flag:",move_flag)
+                testdef.sendMessage(ser,57)
+                time.sleep(0.01)
+                break
+        move_flag=0
+        # line_flag=0
+        recv=b'st'
         
 
     elif recv=='03':       #ceshi shiyong

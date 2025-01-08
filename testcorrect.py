@@ -67,7 +67,7 @@ while True:
 
 
     success, frame = cap.read()
-    cv2.imshow("origin",frame)
+    # cv2.imshow("origin",frame)
 
     corrected_frame=undistortion(frame,mtx,dist)
     color_number =3   #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion

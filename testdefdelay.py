@@ -4,6 +4,7 @@ import math
 import time
 import serial 
 from pyzbar.pyzbar import decode  #ɨ��ά��Ŀ�
+import threading
 
 
 #��ɫ��ֵ
@@ -25,14 +26,43 @@ dim_red_max1 =   [ 180,255, 255]
 correct_x=67
 correct_y=3
 
-#45 24
-correct_x_hough=52
-correct_y_hough=24
-
 npzfile = np.load('calibrate.npz')
 mtx = npzfile['mtx']
 dist = npzfile['dist']
 
+class Camera:
+
+    def __init__(self, camera):
+        self.frame = []
+        self.ret = False
+        self.cap = object
+        self.camera = camera
+        self.openflag = False
+
+    def open(self):
+        # if self.cap == object:
+        self.cap = cv2.VideoCapture(self.camera,cv2.CAP_V4L2)
+        # self.ret = self.cap.set(3, 320)
+        # self.ret = self.cap.set(4, 240)
+        self.ret = self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+        self.ret = self.cap.set(cv2.CAP_PROP_EXPOSURE, float(0.6)) 
+        self.ret = False
+        self.openflag = True
+        threading.Thread(target=self.queryframe, args=()).start()
+
+    def queryframe(self):
+        # self.openflag = True
+        # while True:
+        while self.openflag:
+            self.ret, self.frame = self.cap.read()
+            # pass
+
+    def getframe(self):
+        return self.ret, self.frame
+
+    def close(self):
+        self.openflag = False
+        self.cap.release()
 
 def serialInit():#��ʼ������
     Pi_serial  =  serial.Serial( port="/dev/ttyAMA2",
@@ -172,11 +202,8 @@ rec_dety=[]
 rec_detx1=[]
 rec_dety1=[]
 def findCountours(camera_cap): #ʶ��Բ��  ���ζ�λ
-    success, frame = camera_cap.read()
-    # frame = None
-    success, frame = camera_cap.read()
-    success, frame = camera_cap.read()
-    success, frame = camera_cap.read()
+    ret,frame = camera_cap.getframe()
+    ret,frame = camera_cap.getframe()
     # success, frame = camera_cap.read()
     # cv2.imshow("origin",frame)
 
@@ -284,7 +311,8 @@ def findCountours(camera_cap): #ʶ��Բ��  ���ζ�λ
 
 
 def circlePut_meiyong(cap):  #�meiyong
-    success, frame = cap.read()
+    ret,frame = cap.getframe()
+    ret,frame = cap.getframe()
     color_number =2   #ѡ��Ҫʶ�����ɫ  1��2��3��
     cv2.imshow("origin",frame)
     # cv2.imshow("Result", img)
@@ -355,12 +383,8 @@ def circlePut_meiyong(cap):  #�meiyong
 
 
 def circlePut1(cap):
-    # success, frame = cap.read()
-    # success, frame = cap.read()
-    success=cap.grab()
-    success=cap.grab()
-    success=cap.grab()
-    success, frame = cap.read()
+    ret,frame = cap.getframe()
+    ret,frame = cap.getframe()
     corrected_frame=undistortion(frame,mtx,dist)
     cv2.imshow("corrected",corrected_frame)
     src1 = corrected_frame.copy()
@@ -399,12 +423,10 @@ def circlePut1(cap):
     
 
     circles = cv2.HoughCircles(edges1, cv2.HOUGH_GRADIENT, 0.7,70,
-                            param1=100, param2=65, minRadius=124, maxRadius=155)    #ʶ��Բ��
+                            param1=100, param2=70, minRadius=50, maxRadius=0)    #ʶ��Բ��
     flag = 0
     detx = 0 #�����Ĳ��
     dety = 0
-    detx1 = 0
-    dety1 = 0
     largest_circle = None  # ���ڴ洢���Բ����Ϣ
     stop_flag=0
     if circles is not None:
@@ -426,20 +448,12 @@ def circlePut1(cap):
             text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
         # ��ͼ���ϻ���Բ������
             cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            radius = largest_circle[2]
-            radius_text = f"Radius: {radius}"
-            radius_position = (largest_circle[0] + 10, largest_circle[1] + 20)  # ѡ��һ�����ʵ�λ������ʾ�뾶��Ϣ
-            cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            detx = largest_circle[0] - w/2 -correct_x_hough
-            dety = h/2 - largest_circle[1] -correct_y_hough
-            detx1 = int(round(detx))
-            dety1 = int(round(dety))
-            print("detx=",detx,"dety=",dety)
-            print("detx1=",detx1,"dety1=",dety1)
-            # pi=math.pi
-            # area=largest_circle[2]*largest_circle[2]*pi
-            # area_text=f"{area}"
-            # cv2.putText(res1, area_text, (largest_circle[0], largest_circle[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            detx = largest_circle[0] - w/2 -correct_x
+            dety = h/2 - largest_circle[1] -correct_y
+            pi=math.pi
+            area=largest_circle[2]*largest_circle[2]*pi
+            area_text=f"{area}"
+            cv2.putText(res1, area_text, (largest_circle[0], largest_circle[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     else:
         cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     # print(detx,dety)
@@ -447,104 +461,7 @@ def circlePut1(cap):
     if abs(detx)<4 and abs(dety)<4:
         if abs(detx)!= 0 or abs(detx)!= 0:
             stop_flag = 1
-    cv2.waitKey(1)
-    return detx1,dety1,stop_flag
-
-def circlePut_color(color_cap,color_number):#color_number Ϊ 1 �������ɫ��Ϊ 2 �������ɫ��Ϊ 3 �������ɫ
-    flag_color_1 = 0
-    red_min   =  np.array(dim_red_min)
-    red_max   =  np.array(dim_red_max)
-    green_min =  np.array(dim_green_min)
-    green_max =  np.array(dim_green_max)
-    blue_min  =  np.array(dim_blue_min)   
-    blue_max  =  np.array(dim_blue_max)  
-    red_min1   = np.array(dim_red_min1)  
-    red_max1   = np.array(dim_red_max1)#��������ɫ��ֵ����ɫ��hsvɫ������h��С�Ĳ��ֺ�h�ܴ����������
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret,frame = color_cap.read()
-    # print("ret:",ret)
-    corrected_frame=undistortion(frame,mtx,dist)
-    
-    y0,x0 = corrected_frame.shape[:2]
-    frame_change = cv2.resize(corrected_frame, (int(x0), int(y0)))
-
-    src1 = frame_change.copy()
-    res1 = src1.copy()
-    hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)    # ��BGRͼ��ת��ΪHSVͼ��
-    mask12 = cv2.inRange(hsv,   red_min,   red_max)
-    mask11 = cv2.inRange(hsv,   red_min1,   red_max1)
-    mask2 = cv2.inRange(hsv, green_min, green_max)#�õ�������ɫ����ԭͼƬ���ɰ�
-    mask3 = cv2.inRange(hsv,  blue_min,  blue_max)
-    mask1 = cv2.add(mask12,mask11)
-    if color_number == 1:
-        mask0 = mask1
-    elif color_number == 2:
-        mask0 = mask2
-    elif color_number == 3:
-        mask0 = mask3
-    res1 = cv2.bitwise_and(src1, src1, mask=mask0)   # Ӧ���ɰ�
-    cv2.imshow("res1",res1)
-
-    h, w = res1.shape[:2]
-    blured = cv2.blur(res1, (7, 7))#�˲�
-    blured = cv2.blur(res1, (5, 5))
-    ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#��ֵ��
-    
-    gray = cv2.cvtColor(bright, cv2.COLOR_BGR2GRAY)
-    h_g, w_g = gray.shape[:2]
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#������
-    closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
-    closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
-
-    contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#����������ڻ�ȡɫ�鷶Χ
-    num = 0
-    a_sum=0
-    b_sum=0
-    x_min = 4000
-    x_max = 0
-    y_min = 4000
-    y_max = 0
-    x_center = 0
-    y_center = 0
-    c = 0
-    detx_p=0
-    dety_p=0
-    largest = None
-    largest_area=0
-
-
-    for contour in contours:
-    # �������������
-    # ���������С����
-        area = cv2.contourArea(contour)
-        # print("area:",area)
-        if area > largest_area:
-            largest_area = area
-            largest=contour
-    if largest is not None:
-        (x1, y1, w1, h1) = cv2.boundingRect(largest)
-        a = x1 + w1 / 2
-        b = y1 + h1 / 2
-        cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
-        cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        area_text=f"{area}"
-        cv2.putText(src1, area_text, (x1+60, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        center_text = f"({a}, {b})"
-        cv2.putText(src1, center_text, (x1, y1+h1+5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-        color_text=f"{color_number}"
-        cv2.putText(src1, color_text, (x1, y1+h1+10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        flag_color_1 = 1
-        detx_p = a - w/2 - correct_x_hough
-        dety_p = h/2 - correct_y_hough - b
-        detx_p = int(detx_p)
-        dety_p = int(dety_p)
-
-    cv2.imshow("src1",src1)
-    cv2.waitKey(1)
-    return x_center/ w,y_center/h,frame,flag_color_1,detx_p,dety_p
+    return detx,dety,stop_flag
 
 
 def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 �������ɫ��Ϊ 2 �������ɫ��Ϊ 3 �������ɫ
@@ -557,10 +474,8 @@ def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 ������
     blue_max  =  np.array(dim_blue_max)  
     red_min1   = np.array(dim_red_min1)  
     red_max1   = np.array(dim_red_max1)#��������ɫ��ֵ����ɫ��hsvɫ������h��С�Ĳ��ֺ�h�ܴ����������
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret,frame = color_cap.read()
+    ret,frame = color_cap.getframe()
+    ret,frame = color_cap.getframe()
     # print("ret:",ret)
     corrected_frame=undistortion(frame,mtx,dist)
     
@@ -622,14 +537,14 @@ def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 ������
             # print("color",num,":",a/w, b/h)
             # s=(x1+w1)*(y1+h1)
             
-            cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
-            cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            cv2.rectangle(frame, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
+            cv2.putText(frame, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             area_text=f"{area}"
-            cv2.putText(src1, area_text, (x1+60, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            cv2.putText(frame, area_text, (x1+60, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             center_text = f"({a}, {b})"
-            cv2.putText(src1, center_text, (x1, y1+h1+5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            cv2.putText(res1, center_text, (x1, y1+h1+5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             color_text=f"{color_number}"
-            cv2.putText(src1, color_text, (x1, y1+h1+10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            cv2.putText(frame, color_text, (x1, y1+h1+10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
             
             if num == 1 or c < y1:
@@ -637,16 +552,15 @@ def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 ������
                 y_center = b
                 c = y1
             flag_color_1 = 1
-            detx_p = a - w/2 - correct_x_hough
-            dety_p = h/2 - correct_y_hough - b
+            detx_p = a - w/2 - correct_x
+            dety_p = h/2 - correct_y - b
             detx_p = int(detx_p)
             dety_p = int(dety_p)
-    cv2.imshow("src1",src1)
     cv2.waitKey(1)
-    return x_center/ w,y_center/h,frame,flag_color_1,detx_p,dety_p
+    return x_center/ w,y_center/h,frame,flag_color_1
 
 def detectPlate(camera_cap,color_number):  #���Բ���˶�
-    success, frame = camera_cap.read()  #ѡ��Ҫʶ�����ɫ  1��2��3��
+    success, frame = camera_cap.getframe()  #ѡ��Ҫʶ�����ɫ  1��2��3��
     # print("success:",success)
     # cv2.imshow("origin",frame)
 
@@ -687,15 +601,11 @@ def detectPlate(camera_cap,color_number):  #���Բ���˶�
 
 
 def detectLine(cap):#��⳵���Ƿ���ֱ��ƽ��
+    ret,frame = cap.getframe()
+    ret,frame = cap.getframe()
     # ret,frame = cap.read()
     # ret,frame = cap.read()
     # ret,frame = cap.read()
-    # ret,frame = cap.read()
-    # ret,frame = cap.read()
-    ret=cap.grab()
-    ret=cap.grab()
-    ret=cap.grab()
-    ret,frame = cap.read()
     cnt_line = 0
     # gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     # cv2.imshow("gray",gray)

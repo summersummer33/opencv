@@ -141,6 +141,10 @@ while True:
             text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
         # ��ͼ���ϻ���Բ������
             cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            radius = largest_circle[2]
+            radius_text = f"Radius: {radius}"
+            radius_position = (largest_circle[0] + 10, largest_circle[1] + 20)  # ѡ��һ�����ʵ�λ������ʾ�뾶��Ϣ
+            cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
             detx = largest_circle[0] - w/2
             dety = largest_circle[1] - h/2
             pi=math.pi
