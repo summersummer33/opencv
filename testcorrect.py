@@ -32,23 +32,23 @@ correct_y = 0
 # dim_blue_max =  [124,230,255]
 # dim_red_min1 =   [  160, 50 ,50]
 # dim_red_max1 =   [ 180,255, 255]
-npzfile = np.load('calibrate.npz')
-mtx = npzfile['mtx']
-dist = npzfile['dist']
-def undistortion(img, mtx, dist):   #jibian 
-    h, w = img.shape[:2]
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+# npzfile = np.load('calibrate.npz')
+# mtx = npzfile['mtx']
+# dist = npzfile['dist']
+# def undistortion(img, mtx, dist):   #jibian 
+#     h, w = img.shape[:2]
+#     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
 
-    # print('roi ', roi)
+#     # print('roi ', roi)
 
-    dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
+#     dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
 
-    # crop the image
-    x, y, w, h = roi
-    if roi != (0, 0, 0, 0):
-        dst = dst[y:y + h, x:x + w]
+#     # crop the image
+#     x, y, w, h = roi
+#     if roi != (0, 0, 0, 0):
+#         dst = dst[y:y + h, x:x + w]
 
-    return dst
+#     return dst
 # ser  =  serial.Serial( port="/dev/ttyAMA0",
 #                               baudrate=115200,
 #                               bytesize=serial.EIGHTBITS,
@@ -69,9 +69,9 @@ while True:
     success, frame = cap.read()
     # cv2.imshow("origin",frame)
 
-    corrected_frame=undistortion(frame,mtx,dist)
-    color_number =3   #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion
-    cv2.imshow("corrected_frame",corrected_frame)
+    # corrected_frame=undistortion(frame,mtx,dist)
+    color_number =2  #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion
+    cv2.imshow("corrected_frame",frame)
     # cv2.imshow("Result", img)
     red_min   =  np.array(dim_red_min)   #ת��Ϊ����
     red_max   =  np.array(dim_red_max)
