@@ -49,7 +49,7 @@ import threading
 frameWidth = 640
 frameHeight = 480
 global cap
-# cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
+# cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
 # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 # cap.set(3, frameWidth)
 # cap.set(4, frameHeight)
@@ -62,8 +62,8 @@ global cap
 
 #ttyAMA0
 
-# code_cap = cv2.VideoCapture("/dev/code_video",cv2.CAP_V4L2)  
-code_cap = cv2.VideoCapture(2,cv2.CAP_V4L2) 
+code_cap = cv2.VideoCapture("/dev/code_video1",cv2.CAP_V4L2)  
+# code_cap = cv2.VideoCapture(2,cv2.CAP_V4L2) 
 code_cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
 code_cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
 
@@ -148,7 +148,7 @@ while True:
         # time.sleep(3)
         print("close")
         # cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
-        cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
+        cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
         cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
         cap.set(3, frameWidth)
         cap.set(4, frameHeight)
@@ -203,7 +203,7 @@ while True:
             if i == 0:
                 Time1=time.time()-Time
                 print("Time1:",Time1)
-                time.sleep(0.7)
+                time.sleep(0.5)
                 print("start checkkkkkkkkkkkkkkkkkkk")
                 flag_check=testdef.detectPlate_check(cap,plate_order[i])
                 Time2=time.time()-Time
@@ -468,11 +468,7 @@ while True:
         move_flag=0
         line_flag=0
 
-        # #����е��ϸ��
-        # if circle_time==1 or circle_time==2:
-        #     circle_order=get_order
-        # elif circle_time==3:
-        #     circle_order=put_order
+
         if circle_time<4:
             print("circle_time:",circle_time)
             if circle_time==1 or circle_time==2:
@@ -490,7 +486,7 @@ while True:
                     if recv_first==b'near ground':
                         break
                 Time3=time.time()
-                time_xi=5
+                time_xi=6
                 #��һ����ϸ��
                 while (not move_flag_color_1 and (time.time()-Time3)<time_xi):
                 # while (not move_flag_color_1):

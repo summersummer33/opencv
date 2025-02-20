@@ -356,7 +356,10 @@ def together_line_circle(cap):
                 else:
                     cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     if abs(detx)<15 and abs(dety)<15:
-        if abs(detx)!= 0 or abs(detx)!= 0:
+        if detx1==0 and dety1 ==0:
+            stop_flag=0
+        else:
+        # if abs(detx)!= 0 or abs(dety)!= 0:
             stop_flag = 1
 
     # green_min =  np.array(dim_green_min)
@@ -448,7 +451,7 @@ def together_line_circle(cap):
     return finaltheta,line_flag,detx1,dety1,stop_flag
 
 flag_in=0
-def together_line_circle1(cap):
+def together_line_circle1(cap):  #in green
     ret=cap.grab()
     ret=cap.grab()
     ret=cap.grab()
@@ -614,7 +617,10 @@ def together_line_circle1(cap):
     print("detx1:",detx1,"dety1:",dety1)
 
     if abs(x_incolor)<8 and abs(y_incolor)<8:
-        if abs(x_incolor)!= 0 or abs(y_incolor)!= 0:
+        if x_incolor == 0 and y_incolor==0:
+            stop_flag=0
+        else:
+        # if abs(x_incolor)!= 0 or abs(y_incolor)!= 0:
             stop_flag = 1
             print("11111111111111111")
     cv2.imshow("res1",res1)
@@ -1067,10 +1073,10 @@ def circlePut1(cap):
     # cv2.imshow("xitiaoedge:",edges)
 
     circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
-                            param1=100, param2=65, minRadius=128, maxRadius=155)    #ʶ��Բ��
+                            param1=100, param2=65, minRadius=128, maxRadius=155)    #5th circle
     #minradius 124  param2:65 param1:100  
     # circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
-    #                         param1=100, param2=45, minRadius=165, maxRadius=185)    #ʶ��Բ��
+    #                         param1=100, param2=45, minRadius=165, maxRadius=185)    #6th circle
     flag = 0
     detx = 0 #�����Ĳ��
     dety = 0
