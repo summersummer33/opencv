@@ -8,53 +8,17 @@ import threading
 
 
 
-
-
-# #multi_threading
-# global cap
-# class VideoCaptureThread:
-#     def __init__(self, index=0):
-#         self.cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
-#         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-#         self.cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-#         # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-#         self.frame = None
-#         self.running = True
-#         self.lock = threading.Lock()
-#         self.thread = threading.Thread(target=self.update)
-#         self.thread.start()
-
-#     def update(self):
-#         while self.running:
-#             ret, frame = self.cap.read()
-#             if ret:
-#                 with self.lock:  # ȷ���̰߳�ȫ
-#                     self.frame = frame
-
-#     def read(self):
-#         with self.lock:  # ȷ���̰߳�ȫ
-#             return self.frame
-
-#     def stop(self):
-#         self.running = False
-#         self.thread.join()
-#         self.cap.release()
-
-
-# # ʹ��ʾ��
-# cap = VideoCaptureThread()
-
 ###################################
 
 frameWidth = 640
 frameHeight = 480
 global cap
-# cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
-# cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-# cap.set(3, frameWidth)
-# cap.set(4, frameHeight)
-# cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-# cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
+cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+cap.set(3, frameWidth)
+cap.set(4, frameHeight)
+cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
 
 
@@ -92,10 +56,10 @@ circle_time = 1
 circle_order=[]
 plate_time=1  #zhuanpanjishu
 plate_order=[]
-# recv = b'BB'
+# recv = b'HH'
 recv=''
 line_cishu =1
-get_order=[2,3,1]
+get_order=[3,2,1]
 while True:
     # get_order=[2,3,1]
     # # get_order=[3,3,3]
@@ -105,7 +69,7 @@ while True:
     if recv_mess != None:
         print("recv_mess:",recv_mess)
     if recv_mess != None:
-        if recv_mess == b'AA' or recv_mess==b'BB' or recv_mess==b'CC' or recv_mess==b'DD' or recv_mess==b'EE' or recv_mess==b'FF' or recv_mess==b'GG' or recv_mess==b'st':
+        if recv_mess == b'AA' or recv_mess==b'BB' or recv_mess==b'CC' or recv_mess==b'DD' or recv_mess==b'EE' or recv_mess==b'FF' or recv_mess==b'GG' or recv_mess==b'HH' or recv_mess==b'st':
             recv=recv_mess
     # print("first  recv:",recv)
     print(recv)
@@ -219,6 +183,88 @@ while True:
                 i=i+1
             # time.sleep(3)
             # i=i+1
+        plate_time += 1
+        cv2.destroyAllWindows()
+        recv=b'st'
+
+
+    elif recv==b'HH':    #put on the plate
+        i=0
+        while not cap.isOpened():
+            print("Not open colorcap")
+        # if plate_time == 1:
+        #     plate_order=get_order
+        # elif plate_time == 2:
+        #     plate_order=put_order
+        plate_order=get_order
+        print("plate_order:",plate_order)
+        stop_flag=0
+        # i=0
+        stop_flag_1=0
+        stop_first=0
+        x_last=0
+        y_last=0
+        while not stop_first:
+            flag2 = testdef.detectPlate_gray(cap)
+            x_,y_,img_,flag1,detx,dety,color = testdef.findBlockCenter_gray(cap)
+            if  (flag2 == 1 and flag1 == 1):
+                x_last=x_
+                y_last=y_
+                while not stop_first:
+                    x_,y_,img_,flag_,detx_,dety_,color_number= testdef.findBlockCenter_gray(cap)
+                    if abs(x_last-x_)<0.05 and abs(y_last-y_)<0.05:
+                        print("1")
+                        x_last=x_
+                        y_last=y_
+                    else:
+                        stop_first=1
+        print("kaishidongjixiebi kaishidongjixiebi")
+        while not stop_flag_1:
+            # print("i:",i)
+            # if stop_flag_1==0:
+            flag2 = testdef.detectPlate_gray(cap)
+            x_,y_,img_,flag1,detx,dety,color = testdef.findBlockCenter_gray(cap)
+            if  (flag2 == 1 and flag1 == 1):
+            # if flag2==1: 
+                time_start=time.time()
+                while (not stop_flag_1 and (time.time()-time_start)<3.2):
+                    x_,y_,img_,flag9,detx9,dety9,color = testdef.findBlockCenter_gray(cap)
+                    print("qqqqqqqq:",abs(detx9),abs(dety9))
+                    # if abs(detx9)<12 and abs(dety9)<12 and detx9!=0 and dety9!=0:
+                    if abs(detx9)<12 and abs(dety9)<12 and flag9==1:
+                        stop_flag_1=1
+                        print("stop_flag_1:",stop_flag_1)
+                    else:
+                        testdef.sendMessage2(ser,detx9,dety9)
+                        time.sleep(0.01)
+                if stop_flag_1==1:
+                    testdef.sendMessage(ser,16)
+                    time.sleep(4)
+                else:
+                    print("chaoshilechaoshilechaoshilechaoshile")
+                    time.sleep(2)
+        while i<3:
+            while not stop_flag:
+                print("i:",i)
+            #     # if stop_flag_1==0:
+                flag2 = testdef.detectPlate(cap,plate_order[i])
+                x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,plate_order[i])
+                if  (flag2 == 1 and flag1 == 1):
+                    # stop_flag=plate_order[i]
+                    # if color==plate_order[i]:
+                        stop_flag=1
+                        if plate_order[i] == 1:
+                            testdef.sendMessage(ser,7)
+                        elif plate_order[i] == 2:
+                            testdef.sendMessage(ser,8)
+                        elif plate_order[i]== 3:
+                            testdef.sendMessage(ser,9)
+                    # testdef.sendMessage(ser,stop_flag)
+            # Time = time.time()
+            stop_flag=0
+            stop_flag_1=0
+            time.sleep(2)
+            i=i+1
         plate_time += 1
         cv2.destroyAllWindows()
         recv=b'st'
@@ -446,7 +492,7 @@ while True:
             print("Not open colorcap")
         # if(line_cishu == 2 or line_cishu ==4):
         Time1=time.time()   
-        time_together=5
+        time_together=7
         # for i in range(5):
         #     ret=cap.grab()
         #     ret=cap.grab()
@@ -467,6 +513,7 @@ while True:
         time.sleep(0.01)
         move_flag=0
         line_flag=0
+
 
 
         if circle_time<4:
@@ -495,38 +542,61 @@ while True:
                     # print("iiiiiiiiiiinnnnnnnnnnnnnnnn")
                     # for j in range(3):
                     #     ret=cap.grab()
-                    x_,y_,img_,flag1,detx_p,dety_p = testdef.circlePut_color(cap,circle_order[i])
-                    if abs(detx_p)<12 and abs(dety_p)<12:
-                        print("xitiao11 okokokokokokokokok")
-                        move_flag_color_1=1
-                        break
-                    else:
+                    x_,y_,img_,move_flag_color_1,detx_p,dety_p = testdef.circlePut_color(cap,circle_order[i])
+                    # if abs(detx_p)<12 and abs(dety_p)<12:
+                    #     print("xitiao11 okokokokokokokokok")
+                    #     move_flag_color_1=1
+                    #     break
+                    if move_flag_color_1==0:
                         testdef.sendMessage2(ser,detx_p,dety_p)
                         print("cutiao time:",time.time()-timee)
                         # cutiaojieshou=testdef.receiveMessage(ser)
                         # print("cutiaojieshou:",cutiaojieshou)
+                print("xitiao11 okokokokokokokokok")
                 move_flag_color_1=0   
-                #�ڶ�����ϸ��
-                while (not move_flag_color_2 and (time.time()-Time3)<time_xi):
+                # #�ڶ�����ϸ��
+                # while (not move_flag_color_2 and (time.time()-Time3)<time_xi):
+                # # while (not move_flag_color_2 ):
+                #     print("xxxxxxxx")
+                #     timeee=time.time()
+                #     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
+                #     if move_flag_color_2==0:
+                #         testdef.sendMessage2(ser,detx,dety)
+                #         print("xitiao time:",time.time()-timeee)
+                # print("xitiao22 okokokokokokokokok  move_flag_color_2:",move_flag_color_2)
+                # if circle_order[i] == 1:
+                #     testdef.sendMessage(ser,57)
+                # elif circle_order[i] == 2:
+                #     testdef.sendMessage(ser,64)
+                # elif circle_order[i] == 3:
+                #     testdef.sendMessage(ser,65)
+
+                move_flag_color_2_2=0
+                while (not move_flag_color_2_2 and (time.time()-Time3)<time_xi):
                 # while (not move_flag_color_2 ):
                     print("xxxxxxxx")
                     timeee=time.time()
-                    # for j in range(3):
-                    #     ret=cap.grab()
-                    # detxx=0
-                    # detyy=0
-                    # flagg=0
-                    # for k in range(5):
-                    #     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
-                    #     detxx+=detx
-                    #     detyy+=dety
-                    #     flagg+=move_flag_color_2
-                    # if flagg==0:
-                    #     testdef.sendMessage2(ser,detxx,detyy)
                     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
+                    testdef.sendMessage2(ser,detx,dety)
                     if move_flag_color_2==0:
-                        testdef.sendMessage2(ser,detx,dety)
+                        # testdef.sendMessage2(ser,detx,dety)
                         print("xitiao time:",time.time()-timeee)
+                    else:
+                        detxx=0
+                        detyy=0
+                        flagg=0
+                        for k in range(1):
+                            detx2,dety2,move_flag_color_22=testdef.circlePut1(cap)
+                            testdef.sendMessage2(ser,detx2,dety2)
+                            # print("double check")
+                            detxx+=detx
+                            detyy+=dety
+                            flagg+=move_flag_color_22
+                            print("double check    flagg:",flagg)
+                        if flagg==1:
+                            move_flag_color_2_2=1
+                            break
+                
                 print("xitiao22 okokokokokokokokok  move_flag_color_2:",move_flag_color_2)
                 if circle_order[i] == 1:
                     testdef.sendMessage(ser,57)
@@ -537,6 +607,7 @@ while True:
                 time.sleep(0.01)
                 move_flag_color_2=0
                 i = i+1
+                
             circle_time +=1
 
 

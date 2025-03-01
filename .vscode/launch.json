@@ -1,0 +1,16 @@
+{
+    // ʹ�� IntelliSense �˽�������ԡ� 
+    // ��ͣ�Բ鿴�������Ե�������
+    // ���˽������Ϣ�������: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python ���Գ���: ���������ĵ�ǰ�ļ�",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        }
+    ]
+}

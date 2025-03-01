@@ -10,7 +10,7 @@ correct_y=12
 
 frameWidth = 640
 frameHeight = 480
-cap = cv2.VideoCapture("/dev/up_video")
+cap = cv2.VideoCapture("/dev/up_video1")
 # cap=cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
@@ -95,10 +95,10 @@ while True:
     cv2.imshow('edges',edges)
     
 
-    # circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 0.7,70,
-    #                         param1=100, param2=65, minRadius=124, maxRadius=157)    #ʶ��Բ��
     circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
-                            param1=100, param2=45, minRadius=160, maxRadius=190)    #ʶ��Բ�
+                            param1=100, param2=65, minRadius=140, maxRadius=155)    #ʶ��Բ��
+    # circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
+    #                         param1=100, param2=45, minRadius=160, maxRadius=190)    #ʶ��Բ�
     #124 155
     flag = 0
     detx = 0 #�����Ĳ��

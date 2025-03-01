@@ -8,7 +8,7 @@ correct_y = 0
 
 frameWidth = 640
 frameHeight = 480
-cap = cv2.VideoCapture("/dev/up_video")
+cap = cv2.VideoCapture("/dev/up_video1")
 # cap=cv2.VideoCapture(2)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)

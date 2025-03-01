@@ -7,7 +7,7 @@ import serial
 
 frameWidth = 640
 frameHeight = 480
-color_cap = cv2.VideoCapture("/dev/up_video",cv2.CAP_V4L2)
+color_cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
 color_cap.set(3, frameWidth)
 color_cap.set(4, frameHeight)
 color_cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
@@ -16,8 +16,10 @@ color_cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2))
 
 dim_red_min =   [  0, 60 ,60]
 dim_red_max =   [ 12,203, 255]
-dim_green_min = [61,48,54]# 60 60
+dim_green_min = [40,48,54]# 60 60
 dim_green_max = [78,234,255]
+# dim_green_min = [61,48,54]# 30 48 54   61/48/54 61 taida    #zhuanpan   fanghuangse
+# dim_green_max = [78,234,255]#78,234,255
 dim_blue_min =  [82,105,0]#100 60 80
 dim_blue_max =  [120,255,255]#124 230 255
 dim_red_min1 =   [  160, 50 ,50]
