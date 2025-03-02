@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 import math
 import serial 
+import time
 
 correct_x = 0
 correct_y = 0
 
-frameWidth = 640
-frameHeight = 480
+frameWidth = 1280
+frameHeight =720
 cap = cv2.VideoCapture("/dev/up_video1")
 # cap=cv2.VideoCapture(2)
 cap.set(3, frameWidth)
@@ -43,6 +44,7 @@ dim_red_max1 =   [ 180,255, 255]
 #     return dst
 
 while True:
+    time1=time.time()
     success, frame = cap.read()
     # cv2.imshow("origin",frame)
     src1 = frame.copy()
@@ -96,12 +98,12 @@ while True:
                     cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
                     # ����Բ�ĺͰ뾶
                     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
-                    print("x=",x,"y=",y)
+                    # print("x=",x,"y=",y)
                     center = (int(x), int(y))
                     radius = int(radius)
                     detx = x - w/2 - correct_x
                     dety = h/2 - correct_y - y
-                    print("detx=",detx,"dety=",dety)
+                    # print("detx=",detx,"dety=",dety)
                     detx1 = int(round(detx))
                     dety1 = int(round(dety))
                     cv2.circle(res1, center, 2, (0, 0, 255), 3)
@@ -112,7 +114,7 @@ while True:
                     area_text=f"({largest_area})"
                     cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
                     cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-                    print('  detx1:',detx1,'  dety1:',dety1)
+                    # print('  detx1:',detx1,'  dety1:',dety1)
 
 
                 else:
@@ -123,5 +125,6 @@ while True:
         if abs(detx)!= 0 or abs(detx)!= 0:
             stop_flag = 1
     cv2.imshow("res1",res1)
+    print(time.time()-time1)
     frame=None
     cv2.waitKey(1)

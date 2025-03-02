@@ -563,8 +563,9 @@ def together_line_circle1(cap):  #in green
  
     x_g_new = max(0, x_g - 50)
     y_g_new = max(0, y_g - 50) 
-    w_g_new = min(640, x_g + w_g + 50) - x_g_new 
-    h_g_new = min(480, y_g + h_g + 50) - y_g_new  
+    w_g_new = min(1280, x_g + w_g + 50) - x_g_new 
+    h_g_new = min(720, y_g + h_g + 50) - y_g_new  
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     cv2.rectangle(res1, (x_g_new, y_g_new), (x_g_new + w_g_new, y_g_new + h_g_new), (255, 255, 0), 2)
 
     # ��ȡͼ��
@@ -591,7 +592,8 @@ def together_line_circle1(cap):  #in green
             if len(approx) > 7:  
                 largest_circle_g = approx
     # ѭ�������󣬸��� largest_circle ��ֵ���������߼�
-    if largest_circle_g is not None and largest_area_g > 10000:
+    if largest_circle_g is not None and largest_area_g > 15000:
+        #! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         (x, y), radius = cv2.minEnclosingCircle(largest_circle_g)
         x=x+x_g_new
         y=y+y_g_new
@@ -1096,7 +1098,9 @@ def circlePut1(cap):
     # cv2.imshow("xitiaoedge:",edges)
 
     circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
-                            param1=100, param2=65, minRadius=140, maxRadius=155)    #5th circle
+                            param1=100, param2=65, minRadius=218, maxRadius=233)    #5th circle
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #640/480------140/155
     #minradius 124  param2:65 param1:100  128
     # circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
     #                         param1=100, param2=45, minRadius=165, maxRadius=185)    #6th circle
@@ -1236,7 +1240,7 @@ def circlePut_color(color_cap,color_number):#color_number Ϊ 1 ������
         if area > largest_area:
             largest_area = area
             largest=contour
-    if largest is not None:
+    if largest is not None: 
         (x1, y1, w1, h1) = cv2.boundingRect(largest)
         a = x1 + w1 / 2
         b = y1 + h1 / 2
@@ -1287,16 +1291,16 @@ def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 ������
     res1 = src1.copy()
     hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)   
 
-    # Define the coordinates for the masked regions
-    # Mask the bottom-left region (x1, y1, w1, h1)
-    x1, y1, w1, h1 = 0, int(y0 * 0.75), int(x0 * 0.25), int(y0 * 0.25)  # Bottom-left region
+    # # Define the coordinates for the masked regions
+    # # Mask the bottom-left region (x1, y1, w1, h1)
+    # x1, y1, w1, h1 = 0, int(y0 * 0.75), int(x0 * 0.25), int(y0 * 0.25)  # Bottom-left region
 
-    # Mask the bottom-right region (x2, y2, w2, h2)
-    x2, y2, w2, h2 = int(x0 * 0.75), int(y0 * 0.75), int(x0 * 0.25), int(y0 * 0.25)  # Bottom-right region
+    # # Mask the bottom-right region (x2, y2, w2, h2)
+    # x2, y2, w2, h2 = int(x0 * 0.75), int(y0 * 0.75), int(x0 * 0.25), int(y0 * 0.25)  # Bottom-right region
 
-    # Set the pixel values in the masked regions to invalid values
-    hsv[y1:y1+h1, x1:x1+w1] = 0  # Mask the bottom-left region
-    hsv[y2:y2+h2, x2:x2+w2] = 0  # Mask the bottom-right region
+    # # Set the pixel values in the masked regions to invalid values
+    # hsv[y1:y1+h1, x1:x1+w1] = 0  # Mask the bottom-left region
+    # hsv[y2:y2+h2, x2:x2+w2] = 0  # Mask the bottom-right region
 
 
 
@@ -1377,7 +1381,7 @@ def findBlockCenter(color_cap,color_number):#color_number Ϊ 1 ������
     cv2.waitKey(1)
     return x_center/ w,y_center/h,frame,flag_color_1,detx_p,dety_p
 
-def findBlockCenter_gray(color_cap):#color_number Ϊ 1 �������ɫ��Ϊ 2 �������ɫ��Ϊ 3 �������ɫ
+def findBlockCenter_gray(color_cap):#put on plate sekuai
     color_number=0
     flag_color_1 = 0
     ret = color_cap.grab()
@@ -1537,97 +1541,289 @@ def findBlockCenter_gray(color_cap):#color_number Ϊ 1 �������ɫ�
     x=0
     y=0
 
-    for contour in contours:
-    # �������������
-    # ���������С����
-        area = cv2.contourArea(contour)
-        # print("area:",area)
-        if area > largest_area:
-            largest_area = area
-            peri = cv2.arcLength(contour, True)
-            approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
-            if len(approx) > 5:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
-                largest_circle = approx
-                # print("largest area:",largest_area)
-    if largest_area > 10000 and largest_circle is not None:
-        cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
-        # ����Բ�ĺͰ뾶
-        (x, y), radius = cv2.minEnclosingCircle(largest_circle)
-        # print("x=",x,"y=",y)
-        center = (int(x), int(y))
-        radius = int(radius)
-        detx = x - w/2 - correct_x
-        dety = h/2 - correct_y - y
-        # print("detx=",detx,"dety=",dety)
-        detx1 = int(round(detx))
-        dety1 = int(round(dety))
-        cv2.circle(res1, center, 2, (0, 0, 255), 3)
-        # ����Բ
-        cv2.circle(res1, center, radius, (0, 255, 0), 2)
-        center_text = f"({center[0]}, {center[1]}), radius: {radius}"
-        text_position = (center[0] + 10, center[1] - 10)
-        area_text=f"({largest_area})"
-        cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-        cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-        # print('  detx1:',detx1,'  dety1:',dety1)
+    # for contour in contours:
+    # # �������������
+    # # ���������С����
+    #     area = cv2.contourArea(contour)
+    #     # print("area:",area)
+    #     if area > largest_area:
+    #         largest_area = area
+    #         peri = cv2.arcLength(contour, True)
+    #         approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+    #         if len(approx) > 5:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
+    #             largest_circle = approx
+    #             # print("largest area:",largest_area)
+    # if largest_area > 10000 and largest_circle is not None:
+    #     cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
+    #     # ����Բ�ĺͰ뾶
+    #     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
+    #     # print("x=",x,"y=",y)
+    #     center = (int(x), int(y))
+    #     radius = int(radius)
+    #     detx = x - w/2 - correct_x
+    #     dety = h/2 - correct_y - y
+    #     # print("detx=",detx,"dety=",dety)
+    #     detx1 = int(round(detx))
+    #     dety1 = int(round(dety))
+    #     cv2.circle(res1, center, 2, (0, 0, 255), 3)
+    #     # ����Բ
+    #     cv2.circle(res1, center, radius, (0, 255, 0), 2)
+    #     center_text = f"({center[0]}, {center[1]}), radius: {radius}"
+    #     text_position = (center[0] + 10, center[1] - 10)
+    #     area_text=f"({largest_area})"
+    #     cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+    #     cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    #     # print('  detx1:',detx1,'  dety1:',dety1)
 
-        if x>140 and x<500:
-            flag_color_1 = 1
-        else:
-            detx1=0
-            dety1=0
+    #     flag_color_1 = 1
 
     # if x<20 or x>620:
 
+    blurred1 = cv2.GaussianBlur(equalized, (9, 9), 2)
+    # cv2.imshow("junheng",blurred)
+    edges = cv2.Canny(blurred, 50, 150)
+    # cv2.imshow("xitiaoedge:",edges)
+
+    circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
+                            param1=100, param2=65, minRadius=140, maxRadius=155)    #5th circle
 
 
-    # circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 0.7,70,
-    #                         param1=100, param2=10, minRadius=90, maxRadius=105)    #ʶ��Բ��
+    #124 155
+    flag = 0
+    detx = 0 #�����Ĳ��
+    dety = 0
+    detx1 = 0
+    dety1 = 0
+    largest_circle = None  # ���ڴ洢���Բ����Ϣ
+    stop_flag=0
+    if circles is not None:
+        flag = 1
+        circles = np.uint16(np.around(circles))
+        for i in circles[0, :]:
+        # ����Ƿ�������Բ
+            if largest_circle is None or i[2] > largest_circle[2]:
+                largest_circle = i  # �������Բ����Ϣ
 
-    # #124 155
-    # flag = 0
-    # detx = 0 #�����Ĳ��
-    # dety = 0
-    # detx1 = 0
-    # dety1 = 0
-    # largest_circle = None  # ���ڴ洢���Բ����Ϣ
-    # stop_flag=0
-    # if circles is not None:
-    #     flag = 1
-    #     circles = np.uint16(np.around(circles))
-    #     for i in circles[0, :]:
-    #     # ����Ƿ�������Բ
-    #         if largest_circle is None or i[2] > largest_circle[2]:
-    #             largest_circle = i  # �������Բ����Ϣ
-
-    # # ����ҵ�������Բ�����Ƴ���
-    #     if largest_circle is not None:
-    #     # ������Բ
-    #         cv2.circle(res1, (largest_circle[0], largest_circle[1]), largest_circle[2], (0, 0, 255), 2)
-    #     # �������ĵ�
-    #         cv2.circle(res1, (largest_circle[0], largest_circle[1]), 2, (0, 0, 255), 3)
-    #         center_text = f"({largest_circle[0]}, {largest_circle[1]})"
-    #     # �����ı�λ�ã�ͨ����Բ���Ϸ�
-    #         text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
-    #     # ��ͼ���ϻ���Բ������
-    #         # cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-    #         radius = largest_circle[2]
-    #         radius_text = f"Radius: {radius}"
-    #         radius_position = (largest_circle[0] + 10, largest_circle[1] + 20)  # ѡ��һ�����ʵ�λ������ʾ�뾶��Ϣ
-    #         cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-    #         detx = largest_circle[0] - w/2 -correct_x
-    #         dety = h/2 - largest_circle[1] -correct_y
-    #         detx1 = int(round(detx))
-    #         dety1 = int(round(dety))
-    #         flag_color_1 = 1
-    #         # print("detx=",detx,"dety=",dety)
-    #         print("detx1=",detx1,"dety1=",dety1)
-    # else:
-    #     cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    # ����ҵ�������Բ�����Ƴ���
+        if largest_circle is not None:
+        # ������Բ
+            x=largest_circle[0]
+            y=largest_circle[1]
+            cv2.circle(res1, (largest_circle[0], largest_circle[1]), largest_circle[2], (0, 0, 255), 2)
+        # �������ĵ�
+            cv2.circle(res1, (largest_circle[0], largest_circle[1]), 2, (0, 0, 255), 3)
+            center_text = f"({largest_circle[0]}, {largest_circle[1]})"
+        # �����ı�λ�ã�ͨ����Բ���Ϸ�
+            text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
+        # ��ͼ���ϻ���Բ������
+            # cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            radius = largest_circle[2]
+            radius_text = f"Radius: {radius}"
+            radius_position = (largest_circle[0] + 10, largest_circle[1] + 20)  # ѡ��һ�����ʵ�λ������ʾ�뾶��Ϣ
+            cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            detx = largest_circle[0] - w/2 -correct_x_hough
+            dety = h/2 - largest_circle[1] -correct_y_hough
+            detx1 = int(round(detx))
+            dety1 = int(round(dety))
+            flag_color_1 = 1
+            # print("detx=",detx,"dety=",dety)
+            print("detx1=",detx1,"dety1=",dety1)
+    else:
+        cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     
     cv2.imshow("res1",res1)
     cv2.waitKey(1)
     return x/w,y/h,frame,flag_color_1,detx1,dety1,color_number
+
+def findBlockCenter_circle(color_cap,color_number):#put on plate yuanhuan
+    red_min   =  np.array(dim_red_min)
+    red_max   =  np.array(dim_red_max)
+    green_min =  np.array(dim_green_min)
+    green_max =  np.array(dim_green_max)
+    blue_min  =  np.array(dim_blue_min)   
+    blue_max  =  np.array(dim_blue_max)  
+    red_min1   = np.array(dim_red_min1)  
+    red_max1   = np.array(dim_red_max1)#��������ɫ��ֵ����ɫ��hsvɫ������h��С�Ĳ��ֺ�h�ܴ����������
+    ret = color_cap.grab()
+    ret = color_cap.grab()
+    ret = color_cap.grab()
+    ret,frame = color_cap.read()
+    # print("ret:",ret)
+    # corrected_frame=undistortion(frame,mtx,dist)
+    
+    y0,x0 = frame.shape[:2]
+    frame_change = cv2.resize(frame, (int(x0), int(y0)))
+
+    src1 = frame_change.copy()
+    res1 = src1.copy()
+    hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)    # ��BGRͼ��ת��ΪHSVͼ��
+    mask12 = cv2.inRange(hsv,   red_min,   red_max)
+    mask11 = cv2.inRange(hsv,   red_min1,   red_max1)
+    mask2 = cv2.inRange(hsv, green_min, green_max)#�õ�������ɫ����ԭͼƬ���ɰ�
+    mask3 = cv2.inRange(hsv,  blue_min,  blue_max)
+    mask1 = cv2.add(mask12,mask11)
+    if color_number == 1:
+        mask0 = mask1
+    elif color_number == 2:
+        mask0 = mask2
+    elif color_number == 3:
+        mask0 = mask3
+    res1 = cv2.bitwise_and(src1, src1, mask=mask0)   # Ӧ���ɰ�
+    cv2.imshow("res1",res1)
+
+    h, w = res1.shape[:2]
+    blured = cv2.blur(res1, (7, 7))#�˲�
+    blured = cv2.blur(res1, (5, 5))
+    ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#��ֵ��
+    
+    gray = cv2.cvtColor(bright, cv2.COLOR_BGR2GRAY)
+    equalized = cv2.equalizeHist(gray)
+    h_g, w_g = gray.shape[:2]
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#������
+    closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
+    closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
+    blurred1 = cv2.GaussianBlur(equalized, (9, 9), 2)
+    # cv2.imshow("junheng",blurred)
+    # edges = cv2.Canny(blurred, 50, 150)
+    # cv2.imshow("xitiaoedge:",edges)
+
+    circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
+                            param1=100, param2=65, minRadius=140, maxRadius=155)    #5th circle
+    # circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
+    #                         param1=100, param2=35, minRadius=160, maxRadius=185)    #6th circle
+    flag = 0
+    detx = 0 #�����Ĳ��
+    dety = 0
+    detx1 = 0
+    dety1 = 0
+    x_center=0
+    y_center=0
+    flag_color_1=0
+    largest_circle = None  # ���ڴ洢���Բ����Ϣ
+    stop_flag=0
+    if circles is not None:
+        flag = 1
+        circles = np.uint16(np.around(circles))
+        for i in circles[0, :]:
+        # ����Ƿ�������Բ
+            if largest_circle is None or i[2] > largest_circle[2]:
+                largest_circle = i  # �������Բ����Ϣ
+
+    # ����ҵ�������Բ�����Ƴ���
+        if largest_circle is not None:
+        # ������Բ
+            x_center=largest_circle[0]
+            y_center=largest_circle[1]
+            cv2.circle(src1, (largest_circle[0], largest_circle[1]), largest_circle[2], (0, 0, 255), 2)
+        # �������ĵ�
+            cv2.circle(src1, (largest_circle[0], largest_circle[1]), 2, (0, 0, 255), 3)
+            center_text = f"({largest_circle[0]}, {largest_circle[1]})"
+        # �����ı�λ�ã�ͨ����Բ���Ϸ�
+            text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
+        # ��ͼ���ϻ���Բ������
+            # cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            radius = largest_circle[2]
+            radius_text = f"Radius: {radius}"
+            radius_position = (largest_circle[0] + 10, largest_circle[1] + 20)  # ѡ��һ�����ʵ�λ������ʾ�뾶��Ϣ
+            cv2.putText(src1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+            detx = largest_circle[0] - w/2 -correct_x_hough
+            dety = h/2 - largest_circle[1] -correct_y_hough
+            detx1 = int(round(detx))
+            dety1 = int(round(dety))
+            flag_color_1 = 1
+            # print("detx=",detx,"dety=",dety)
+            print("detx1=",detx1,"dety1=",dety1)
+    else:
+        cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    # x_g=0
+    # y_g=0
+    # w_g=0
+    # h_g=0
+    # x_center=0
+    # y_center=0
+    # flag_color_1 = 0
+    # detx=0
+    # dety=0
+    # detx1=0
+    # dety1=0
+    # contours_green, _ = cv2.findContours(mask0, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # large_contours_green = []
+    # # largest_area_green=0
+    # for contour in contours_green:
+    #     area = cv2.contourArea(contour)
+    #     if area > 100 :
+    #         large_contours_green.append(contour)
+    # if large_contours_green:
+    #     merged_contour_g = np.vstack(large_contours_green)
+    #     x_g, y_g, w_g, h_g = cv2.boundingRect(merged_contour_g)
+    #     cv2.rectangle(src1, (x_g, y_g), (x_g + w_g, y_g + h_g), (0, 255, 0), 2)
+    #     print("area:",w_g*h_g)
+    #     if w_g*h_g>80000:
+    #         x_center = x_g + w_g / 2
+    #         y_center = y_g + h_g / 2
+    #         flag_color_1 =1
+    #         # detx = x_center - w/2 -correct_x
+    #         # dety = h/2 - y_center -correct_y
+    #         # detx1 = int(round(detx))
+    #         # dety1 = int(round(dety))
+
+
+
+    # contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#����������ڻ�ȡɫ�鷶Χ
+    # num = 0
+    # a_sum=0
+    # b_sum=0
+    # x_min = 4000
+    # x_max = 0
+    # y_min = 4000
+    # y_max = 0
+    # x_center = 0
+    # y_center = 0
+    # c = 0
+    # detx_p=10000
+    # dety_p=10000
+    # largest = None
+    # largest_area=0
+    # flag_color_1 = 0
+
+
+    # for contour in contours:
+    # # �������������
+    # # ���������С����
+    #     area = cv2.contourArea(contour)
+    #     # print("area:",area)
+    #     if area > largest_area:
+    #         largest_area = area
+    #         largest=contour
+    # if largest is not None and largest_area>70000: ##########################gaidong
+    #     (x1, y1, w1, h1) = cv2.boundingRect(largest)
+    #     x_center = x1 + w1 / 2
+    #     y_center = y1 + h1 / 2
+    #     print("area:",w1*h1)
+    #     cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
+    #     cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    #     area_text=f"{area}"
+    #     cv2.putText(src1, area_text, (x1+60, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    #     center_text = f"({a}, {b})"
+    #     cv2.putText(src1, center_text, (x1, y1+h1+5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+    #     color_text=f"{color_number}"
+    #     cv2.putText(src1, color_text, (x1, y1+h1+10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+    #     detx_p = x_center - w/2 - correct_x_hough
+    #     dety_p = h/2 - correct_y_hough - y_center
+    #     detx_p = int(detx_p)
+    #     dety_p = int(dety_p)
+    #     flag_color_1 =1
+        # print("detx_p:",detx_p,"dety_p:",dety_p)
+    # if abs(detx_p)<12 and abs(dety_p)<12:
+    #     flag_color_1 =1
+    # if (detx_p==10000) and (dety_p==10000):
+    #     detx_p=0
+    #     dety_p=0
+    cv2.imshow("src1",src1)
+    # print("detx_p:",detx_p,"dety_p:",dety_p,"flag_color_1:",flag_color_1)
+    cv2.waitKey(1)
+    return x_center/ w,y_center/h,frame,flag_color_1
 
 def detectPlate(camera_cap,color_number):  #���Բ���˶�
     success, frame = camera_cap.read()  #ѡ��Ҫʶ�����ɫ  1��2��3��
@@ -1712,7 +1908,7 @@ def detectPlate_check(camera_cap,color_number):  #ת�̴�����Ƿ��
     cv2.waitKey(1)
     return flag_stop
 
-def detectPlate_gray(camera_cap):  #put on the plate
+def detectPlate_gray(camera_cap):  #put on the plate sekuai
     success, frame = camera_cap.read()  #ѡ��Ҫʶ�����ɫ  1��2��3��
     # print("success:",success)
     # cv2.imshow("origin",frame)
@@ -1744,6 +1940,48 @@ def detectPlate_gray(camera_cap):  #put on the plate
         flag_stop=1
     else:#��ɫ���ƶ���ʱ���ж�ɫ���������ƶ����������ƶ�
         if get_blog == 5:
+            if((x_ - x_add)>0.02 ):
+                turn_direction = True
+            if((x_ - x_add)<-0.02 ):
+                turn_direction = False
+        flag_stop=0 
+    print("zhuanpantingzhi flag:",flag_stop)
+    cv2.waitKey(1)
+    return flag_stop
+
+def detectPlate_circle(camera_cap,color_number):  #put on the plate yuanhuan
+    success, frame = camera_cap.read()  #ѡ��Ҫʶ�����ɫ  1��2��3��
+    # print("success:",success)
+    # cv2.imshow("origin",frame)
+
+    global turn_direction
+    cnt2 = 0
+    x_add = 0
+    y_add = 0
+    get_blog = 0
+    flag_stop = 0
+    times=3
+    while(cnt2 < times): #��������Ƭ������ɫ�����ĵ��ƶ��ȶ�
+        
+        global x_,y_
+        x_,y_,img_,flag_=findBlockCenter_circle(camera_cap,color_number)
+        x_add = x_add + x_
+        y_add = y_add + y_
+        # cv2.imshow("img",img_)
+        cv2.waitKey(2)
+        time.sleep(8e-2)
+        cnt2 = cnt2 + 1
+        get_blog = get_blog +flag_
+    x_add = x_add /times
+    y_add = y_add /times
+    print("gray_getblog:",get_blog)
+    # print("get_blog",get_blog)
+    if (abs(x_ - x_add) <0.01 and abs(y_ - y_add) < 0.01 and get_blog == times): 
+        #��6��ͼƬ���������ͼƬ��ɫ�����ĵ�ƽ���������һ�ε�ɫ������ ����ƫ��һ������ 
+        #���жϸ���ɫɫ��û��ֹͣ������ֹͣ��
+        flag_stop=1
+    else:#��ɫ���ƶ���ʱ���ж�ɫ���������ƶ����������ƶ�
+        if get_blog == times:
             if((x_ - x_add)>0.02 ):
                 turn_direction = True
             if((x_ - x_add)<-0.02 ):
