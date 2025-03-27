@@ -5,8 +5,8 @@ import serial
 
 
 
-frameWidth = 640
-frameHeight = 480
+frameWidth = 1280
+frameHeight = 720
 color_cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
 color_cap.set(3, frameWidth)
 color_cap.set(4, frameHeight)
@@ -26,8 +26,8 @@ dim_red_min1 =   [  160, 50 ,50]
 dim_red_max1 =   [ 180,255, 255]
 color_number=2
 
-correct_x = 42
-correct_y = 16
+correct_x = 0
+correct_y = 0
 
 # npzfile = np.load('calibrate.npz')
 # mtx = npzfile['mtx']

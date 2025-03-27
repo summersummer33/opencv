@@ -7,24 +7,27 @@ def empty():
 
 
 
-# frameWidth = 640
-# frameHeight = 480
-# cap = cv2.VideoCapture(0)
-# cap.set(3, frameWidth)
-# cap.set(4, frameHeight)
-cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+# cap = cv2.VideoCapture(2,cv2.CAP_V4L2)
+cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
+# cap = cv2.VideoCapture("/dev/code_video1",cv2.CAP_V4L2)
+# cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+# cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('Y', 'U', 'Y', 'V'))
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-# cap.set(cv2.CAP_PROP_BRIGHTNESS,1)
-cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3.0)
-# cap.set(cv2.CAP_PROP_EXPOSURE, 166) 
-# cap.set(10,150)
-
+cap.set(3, 1280)#��
+cap.set(4, 720)#��
+# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+# cap.set(cv2.CAP_PROP_EXPOSURE, float(0.6)) 
+cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+# cap.set(cv2.CAP_PROP_EXPOSURE, float(0.1))
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+# ret = cap.grab()
 
 cv2.namedWindow("TrackBars")
 cv2.resizeWindow("TrackBars",640,240)
-cv2.createTrackbar("Hue Min","TrackBars",0,179,empty)
-cv2.createTrackbar("Hue Max","TrackBars",179,179,empty)
-cv2.createTrackbar("Sat Min","TrackBars",0,255,empty)
+cv2.createTrackbar("Hue Min","TrackBars",82,179,empty)
+cv2.createTrackbar("Hue Max","TrackBars",120,179,empty)
+cv2.createTrackbar("Sat Min","TrackBars",105,255,empty)
 cv2.createTrackbar("Sat Max","TrackBars",255,255,empty)
 cv2.createTrackbar("Val Min","TrackBars",0,255,empty)
 cv2.createTrackbar("Val Max","TrackBars",255,255,empty)

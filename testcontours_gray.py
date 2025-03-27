@@ -103,7 +103,7 @@ while True:
                     radius = int(radius)
                     detx = x - w/2 - correct_x
                     dety = h/2 - correct_y - y
-                    # print("detx=",detx,"dety=",dety)
+                    print("detx=",detx,"dety=",dety)
                     detx1 = int(round(detx))
                     dety1 = int(round(dety))
                     cv2.circle(res1, center, 2, (0, 0, 255), 3)
@@ -114,7 +114,7 @@ while True:
                     area_text=f"({largest_area})"
                     cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
                     cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-                    # print('  detx1:',detx1,'  dety1:',dety1)
+                    print('  detx1:',detx1,'  dety1:',dety1)
 
 
                 else:
@@ -125,6 +125,6 @@ while True:
         if abs(detx)!= 0 or abs(detx)!= 0:
             stop_flag = 1
     cv2.imshow("res1",res1)
-    print(time.time()-time1)
+    # print(time.time()-time1)
     frame=None
     cv2.waitKey(1)

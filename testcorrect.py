@@ -5,21 +5,26 @@ import serial
 
 
 
-frameWidth = 640
-frameHeight = 480
-cap = cv2.VideoCapture(0,cv2.CAP_V4L2)
-cap.set(3, 640)
-cap.set(4, 480)
-cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
-cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
-dim_red_min =   [  0, 133,68]
-dim_red_max =   [ 11,255, 255]
-dim_green_min = [44,51,0]# 60 60
-dim_green_max = [67,255,255]
-dim_blue_min =  [96,72,0] 
-dim_blue_max =  [117,255,255]
+frameWidth = 1280
+frameHeight = 720
+color_cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
+color_cap.set(3, frameWidth)
+color_cap.set(4, frameHeight)
+color_cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+color_cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+color_cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2)) 
 
+dim_red_min =   [  0, 60 ,60]
+dim_red_max =   [ 12,203, 255]
+dim_green_min = [40,48,54]# 60 60
+dim_green_max = [78,234,255]
+# dim_green_min = [61,48,54]# 30 48 54   61/48/54 61 taida    #zhuanpan   fanghuangse
+# dim_green_max = [78,234,255]#78,234,255
+dim_blue_min =  [82,105,0]#100 60 80
+dim_blue_max =  [120,255,255]#124 230 255
+dim_red_min1 =   [  160, 50 ,50]
+dim_red_max1 =   [ 180,255, 255]
+color_number=3
 
 correct_x = 0
 correct_y = 0
@@ -66,11 +71,11 @@ while True:
     #     success, frame = cap.read()
 
 
-    success, frame = cap.read()
+    success, frame = color_cap.read()
     # cv2.imshow("origin",frame)
 
     # corrected_frame=undistortion(frame,mtx,dist)
-    color_number =2  #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion
+    color_number =3  #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion
     cv2.imshow("corrected_frame",frame)
     # cv2.imshow("Result", img)
     red_min   =  np.array(dim_red_min)   #ת��Ϊ����
@@ -114,7 +119,7 @@ while True:
     opened = cv2.morphologyEx(blurred, cv2.MORPH_CLOSE, kernel)
     closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
     closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
-    edges1 = cv2.Canny(closed1, 50, 150)
+    edges1 = cv2.Canny(closed1, 50, 100)
     cv2.imshow("closed",closed)
     cv2.imshow("edges1",edges1)
     contours, _ = cv2.findContours(edges1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -135,7 +140,7 @@ while True:
             largest_area = area
             peri = cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
-            if len(approx) > 7:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
+            if len(approx) > 2:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
                 largest_circle = approx
                 # print("largest area:",largest_area)
                 if largest_area > 10000 :
@@ -144,7 +149,7 @@ while True:
                     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
                     center = (int(x), int(y))
                     radius = int(radius) 
-                    detx = x - w/2 - correct_x
+                    detx = x - w/2 - correct_x   #681   348
                     dety = h/2 - y - correct_y
                     print("detx=",detx,"dety=",dety)
                     detx = int(round(detx))
