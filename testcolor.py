@@ -13,7 +13,7 @@ framerate = 60			# ֡��
 cap = cv2.VideoCapture("/dev/up_video1",cv2.CAP_V4L2)
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 # ret = cap.grab()
 
 

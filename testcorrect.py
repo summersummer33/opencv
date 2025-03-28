@@ -29,74 +29,36 @@ color_number=3
 correct_x = 0
 correct_y = 0
 
-# dim_red_min =   [  0, 60 ,60]
-# dim_red_max =   [ 12,203, 255]
-# dim_green_min = [45,60,60]# 60 60
-# dim_green_max = [95,250,250]
-# dim_blue_min =  [100,60,80]
-# dim_blue_max =  [124,230,255]
-# dim_red_min1 =   [  160, 50 ,50]
-# dim_red_max1 =   [ 180,255, 255]
-# npzfile = np.load('calibrate.npz')
-# mtx = npzfile['mtx']
-# dist = npzfile['dist']
-# def undistortion(img, mtx, dist):   #jibian 
-#     h, w = img.shape[:2]
-#     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-
-#     # print('roi ', roi)
-
-#     dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
-
-#     # crop the image
-#     x, y, w, h = roi
-#     if roi != (0, 0, 0, 0):
-#         dst = dst[y:y + h, x:x + w]
-
-#     return dst
-# ser  =  serial.Serial( port="/dev/ttyAMA0",
-#                               baudrate=115200,
-#                               bytesize=serial.EIGHTBITS,
-#                               parity=serial.PARITY_NONE,
-#                               stopbits=serial.STOPBITS_ONE,
-#                               )
 
 while True:
-    # count = ser.inWaiting()
-    # if count != 0:
-    #         # ��ȡ���ݲ�����
-    #     recv = ser.read(count)  #��ݮ�ɴ��ڽ�������
-    
-    # if recv=='#' :
-    #     success, frame = cap.read()
 
 
     success, frame = color_cap.read()
     # cv2.imshow("origin",frame)
 
     # corrected_frame=undistortion(frame,mtx,dist)
-    color_number =3  #ѡ��Ҫʶ�����ɫ  1��2��3��      color portion
+    color_number =3  #color portion
     cv2.imshow("corrected_frame",frame)
     # cv2.imshow("Result", img)
-    red_min   =  np.array(dim_red_min)   #ת��Ϊ����
+    red_min   =  np.array(dim_red_min)   
     red_max   =  np.array(dim_red_max)
     green_min =  np.array(dim_green_min)
     green_max =  np.array(dim_green_max)
     blue_min  =  np.array(dim_blue_min)   
     blue_max  =  np.array(dim_blue_max)  
-    # red_min1   = np.array(dim_red_min1)  
-    # red_max1   = np.array(dim_red_max1)
+    red_min1   = np.array(dim_red_min1)  
+    red_max1   = np.array(dim_red_max1)
     src1 = frame.copy()
     res1 = src1.copy()
     h, w = res1.shape[:2]
-    hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)    # ��BGRͼ��ת��ΪHSVͼ��
+    hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)    
     mask12 = cv2.inRange(hsv,   red_min,   red_max)
-    # mask11 = cv2.inRange(hsv,   red_min1,   red_max1)
-    mask2 = cv2.inRange(hsv, green_min, green_max)#�õ�������ɫ����ԭͼƬ���ɰ�
+    mask11 = cv2.inRange(hsv,   red_min1,   red_max1)
+    mask2 = cv2.inRange(hsv, green_min, green_max)
     mask3 = cv2.inRange(hsv,  blue_min,  blue_max)
-    # mask1 = cv2.add(mask12,mask11)
+    mask1 = cv2.add(mask12,mask11)
     if color_number == 1:
-        mask0 = mask12
+        mask0 = mask1
     elif color_number == 2:
         mask0 = mask2
     elif color_number == 3:

@@ -24,9 +24,7 @@ cap.set(4, 720)#��
 # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
 # cap.set(cv2.CAP_PROP_EXPOSURE, float(0.6)) 
 cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-# cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
-# cap.set(cv2.CAP_PROP_EXPOSURE, float(0.1))
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+# cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 # ret = cap.grab()
 
 
@@ -56,10 +54,10 @@ while True:
     # print("h:",h,"w:,",w)
     # detx1,dety1,move_flag,stop_flag=testdef.findCountours(cap)
     # detx,dety,move_flag_color_2=testdef.circlePut1(cap)
-    theta,line_flag,detx,dety,move_flag=testdef.together_line_circle1(cap)
+    # theta,line_flag,detx,dety,move_flag=testdef.together_line_circle1(cap)
     # a,b,frame,flag_color_1,detx_p,dety_p=findBlockCenter11(cap,2)
     # x_,y_,img_,flag9,detx9,dety9,color = testdef.findBlockCenter_gray(cap)
-    # x_,y_,img_,flag9,detx9,dety9= testdef.findBlockCenter(cap,2)
+    x_,y_,img_,flag9,detx9,dety9= testdef.findBlockCenter(cap,2)
 
     # x_,y_,img_,flag_=testdef.findBlockCenter_circle(cap,1)
     # finaltheta,line_flag=testdef.detectLine(cap)

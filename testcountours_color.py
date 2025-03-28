@@ -16,7 +16,7 @@ color_cap.set(cv2.CAP_PROP_EXPOSURE, float(0.2))
 
 dim_red_min =   [  0, 60 ,60]
 dim_red_max =   [ 12,203, 255]
-dim_green_min = [40,48,54]# 60 60
+dim_green_min = [30,48,54]# 60 60
 dim_green_max = [78,234,255]
 # dim_green_min = [61,48,54]# 30 48 54   61/48/54 61 taida    #zhuanpan   fanghuangse
 # dim_green_max = [78,234,255]#78,234,255
@@ -29,30 +29,6 @@ color_number=2
 correct_x = 0
 correct_y = 0
 
-# npzfile = np.load('calibrate.npz')
-# mtx = npzfile['mtx']
-# dist = npzfile['dist']
-# def undistortion(img, mtx, dist):   #jibian 
-#     h, w = img.shape[:2]
-#     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-
-#     # print('roi ', roi)
-
-#     dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
-
-#     # crop the image
-#     x, y, w, h = roi
-#     if roi != (0, 0, 0, 0):
-#         dst = dst[y:y + h, x:x + w]
-
-#     return dst
-
-# ser  =  serial.Serial( port="/dev/ttyAMA0",
-#                               baudrate=115200,
-#                               bytesize=serial.EIGHTBITS,
-#                               parity=serial.PARITY_NONE,
-#                               stopbits=serial.STOPBITS_ONE,
-#                               )
 
 while True:
     flag_color_1 = 0
@@ -71,10 +47,8 @@ while True:
     # print("ret:",ret)
     # corrected_frame=undistortion(frame,mtx,dist)
     
-    y0,x0 = frame.shape[:2]
-    frame_change = cv2.resize(frame, (int(x0), int(y0)))
 
-    src1 = frame_change.copy()
+    src1 = frame.copy()
     res1 = src1.copy()
     hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)    # ��BGRͼ��ת��ΪHSVͼ��
     mask12 = cv2.inRange(hsv,   red_min,   red_max)

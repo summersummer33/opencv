@@ -23,7 +23,7 @@ dim_red_max1 =   [ 180,255, 255]
 dim_gray_min=[95,0,0] 
 dim_gray_max=[180,255,255]
 
-#转盘夹取物料 物料面积大小系数
+#转盘夹取物料 物料面积大小系数  0.039
 block_area=0.039
 #粗调时
 cutiao_center_circle=0.016
@@ -46,8 +46,11 @@ correct_y=-9
 #用了很久  43  7 
 #37  6
 #细调时高度的偏差值(houghcircles)
-correct_x_hough=38
-correct_y_hough=6
+correct_x_hough=36
+correct_y_hough=7
+#存储默认值
+correct_x_hough_default=correct_x_hough
+correct_y_hough_default=correct_y_hough
 
 #摄像头分辨率
 frameWidth = 1280
@@ -67,7 +70,9 @@ houghradius_max=212
 houghradius_min_6th=209
 houghradius_max_6th=233
 
-
+###########################################################################################
+###########################################################################################
+###########################################################################################
 
 def serialInit():  #初始化串口通信
     Pi_serial  =  serial.Serial( port="/dev/ttyAMA2",
@@ -514,7 +519,7 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
             approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
             if len(approx) > 7:  
                 largest_circle_g = approx
-    if largest_circle_g is not None and largest_area_g > cutiao_center_circle*w*h:
+    if largest_circle_g is not None and largest_area_g > cutiao_center_circle*w*h:    #0.016
         (x, y), radius = cv2.minEnclosingCircle(largest_circle_g)
         x=x+x_g_new
         y=y+y_g_new
@@ -1247,6 +1252,14 @@ def updateCorrectxy(color_cap,color_number):   #爪子夹不紧时 更新中心�
     print("correct_x_update:",correct_x_hough,"correct_y_update",correct_y_hough)
     return 0
 
+def defaltCorrectxy():
+    global correct_x_hough
+    global correct_y_hough
+    correct_x_hough=correct_x_hough_default
+    correct_y_hough=correct_y_hough_default
+
+
+
 def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     flag_color_1 = 0
     color_number = 0
@@ -1265,10 +1278,10 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     # print("ret:",ret)
     # corrected_frame=undistortion(frame,mtx,dist)
     
-    y0,x0 = frame.shape[:2]
-    frame_change = cv2.resize(frame, (int(x0), int(y0)))
+    # y0,x0 = frame.shape[:2]
+    # frame_change = cv2.resize(frame, (int(x0), int(y0)))
 
-    src1 = frame_change.copy()
+    src1 = frame.copy()
     res1 = src1.copy()
     hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)   
 
@@ -1282,7 +1295,6 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     green_pixels = cv2.countNonZero(mask2)
     blue_pixels = cv2.countNonZero(mask3)
     print("red_pixels:",red_pixels,"green_pixels",green_pixels,"blue_pixels:",blue_pixels)
-    #��Ҫ���ݾ�����뿴���Ĵ�С�ټ�һ��ʶ�����ظ�����Χ�ж�
     color = None
     if red_pixels > blue_pixels and red_pixels > green_pixels:
         color_number = 1
@@ -1328,7 +1340,7 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     detx_p=0
     dety_p=0
     for cnt343 in contours:
-        (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  # �ú������ؾ����ĸ���
+        (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  
         area = cv2.contourArea(cnt343)
         if w1*h1 > 0.05*w*h:
         # if area > 0.07*w*h:
@@ -1340,7 +1352,7 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
             # print("color",num,":",a/w, b/h)
             # s=(x1+w1)*(y1+h1)
             
-            cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
+            cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)
             cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             # area_text=f"{area}"
             area_text=f"{w1*h1}"
@@ -1439,11 +1451,13 @@ def findBlockCenter(color_cap,color_number):   #转盘处识别色块中心位�
     for cnt343 in contours:
         (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  
         area = cv2.contourArea(cnt343)
+        # print("area:",w1*h1)
         # cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)  
         # area_text=f"{w1*h1}"
         # cv2.putText(src1, area_text, (x1+60, y1 +h1+ 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-        if w1*h1 > block_area*w*h:
+        if w1*h1 > block_area*w*h:    #0.039
         # if area > 0.07*w*h:
+            # print("success:",w1*h1)
             a = x1 + w1 / 2
             b = y1 + h1 / 2
             num += 1
@@ -1487,12 +1501,15 @@ def findBlockCenter(color_cap,color_number):   #转盘处识别色块中心位�
         # cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (255, 0, 255), 2)  # 使用红色框表示最上方的色块
         cv2.rectangle(src1, (x_t, y_t), (x_t + w_t, y_t + h_t), (255, 0, 255), 2)  # 画出最上方的色块
         # # cv2.putText(src1, "Topmost Block", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)  # 添加文字标记
+        x_center = x_t + w_t / 2
+        y_center = y_t + h_t / 2
         flag_color_1 = 1
         detx_p = x_center - w/2 - correct_x_hough
         dety_p = h/2 - correct_y_hough - y_center
         detx_p = int(detx_p)
         dety_p = int(dety_p)
 
+    print("detx_p:",detx_p,"dety_p:",dety_p,"flag_color_1:",flag_color_1)
     cv2.imshow("src1",src1)
     cv2.waitKey(1)
     return x_center/ w,y_center/h,frame,flag_color_1,detx_p,dety_p
@@ -1960,7 +1977,7 @@ def detectPlate(camera_cap,color_number):   #检测转盘是否停止（从转�
     return flag_stop
 
 def detectPlate_check(camera_cap,color_number):  #夹第一个物料时检测爪子是否成功抓起
-    success, frame = camera_cap.read() 
+    # success, frame = camera_cap.read() 
     # global turn_direction
     cnt2 = 0
     get_blog = 0
@@ -1974,7 +1991,7 @@ def detectPlate_check(camera_cap,color_number):  #夹第一个物料时检测爪
         x_,y_,img_,flag_,detx,dety= findBlockCenter(camera_cap,color_number)
         print("x_:",x_,"y_:",y_,"flag_:",flag_)
         # cv2.imshow("img",img_)
-        cv2.waitKey(2)
+        cv2.waitKey(1)
         # time.sleep(8e-2)
         cnt2 = cnt2 + 1
         x_add = x_add + x_
@@ -1982,7 +1999,7 @@ def detectPlate_check(camera_cap,color_number):  #夹第一个物料时检测爪
         get_blog = get_blog +flag_
     x_add = x_add /times
     y_add = y_add /times
-    if (abs(x_add-x_) <0.05 and abs(y_add-y_) < 0.05 and get_blog == times):  
+    if (abs(x_add-x_) <0.1 and abs(y_add-y_) < 0.1 and get_blog == times):  
         flag_stop=1
     print("get_blog",get_blog,"flag:",flag_stop)
     cv2.waitKey(1)
@@ -2240,6 +2257,11 @@ def code(code_cap):  #识别二维码、条形码
         print("222     successsssssssss")
     else:
         print("222     faillllllllll")
+    count=0
+    while ret == False and count<10:
+        print("ret  fail")
+        ret,frame = code_cap.read()
+        count+=1
     cv2.imshow("frame",frame)
     barcodes = decode(frame)  
     flag = 0

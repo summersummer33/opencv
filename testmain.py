@@ -26,9 +26,10 @@ cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 #初始化侧边二维码摄像头
 # code_cap=None
 code_cap = cv2.VideoCapture("/dev/code_video1",cv2.CAP_V4L2)  
-code_cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
-code_cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+code_cap.set(cv2.CAP_PROP_FRAME_WIDTH,frameWidth)
+code_cap.set(cv2.CAP_PROP_FRAME_HEIGHT,frameHeight)
 code_cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+code_cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 if code_cap.isOpened():
     print("start      successsssssssss")
 else:
@@ -110,8 +111,9 @@ while True:
         data2 = data[4:7]
         # print("data1",data1)
         # print("data2",data2)
-        get_order=testdef.sort(data1)
-        put_order=testdef.sort(data2)
+        if code_end==1:
+            get_order=testdef.sort(data1)
+            put_order=testdef.sort(data2)
         order=get_order+put_order
         ####二维码信息发送给stm32
         testdef.sendMessage3(ser,order)
@@ -405,8 +407,9 @@ while True:
                 x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,plate_order[i])
                 #当所看对应颜色物料静止时
                 if  (flag2 == 1 and flag1 == 1):
-                    testdef.updateCorrectxy(cap,plate_order[i])
+                    # testdef.updateCorrectxy(cap,plate_order[i])
                     x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,plate_order[i])
+                    print("detx:",detx,"dety:",dety,"flag1:",flag1)
                     stop_flag = plate_order[i]  #令标志位为颜色序号
                     print("stop_flag",stop_flag)
                     testdef.sendMessage2(ser,detx,dety)  #给机械臂发送大致调整参数
@@ -421,31 +424,43 @@ while True:
             Time = time.time()
             stop_flag=0
             flag_check=0
+            time_plate_check=6.2
             #每次转到物料盘后检查
             # if i == 0:
-            while True:
+            while (not flag_check) and ((time.time()-Time)<time_plate_check):
                 recv_check=testdef.receiveMessage(ser)
                 print("recv_check",recv_check)
                 if recv_check==b'check':
-                    break
-            Time1=time.time()
-            # print("Time1:",Time1)
-            # time.sleep(0.5)
-            print("start checkkkkkkkkkkkkkkkkkkk")
-            flag_check=testdef.detectPlate_check(cap,plate_order[i])
-            Time2=time.time()-Time1
-            print("Time2:",Time2)
-            print("flag_chexk:",flag_check)
-            if flag_check :  #如果夹到了继续下一个颜色
-                print("next colorrrrrrrrrrrrrrrrrrrr")
-                i=i+1
-            else:  #没夹到仍等待第一个
-                testdef.sendMessage(ser,3)
-            # else :
-            #     time.sleep(3)
+                    print("start checkkkkkkkkkkkkkkkkkkk")
+                    flag_check=testdef.detectPlate_check(cap,plate_order[i])
+                    print("flag_chexk:",flag_check)
+                    if flag_check :  #如果夹到了继续下一个颜色
+                        print("next colorrrrrrrrrrrrrrrrrrrr")
+                        i=i+1
+                    else:  #没夹到仍等待第一个
+                        testdef.sendMessage(ser,3)
+                        flag_check=1
+                    # break
+            if not flag_check:
+                i+=1
+            # # Time1=time.time()
+            # # print("Time1:",Time1)
+            # # time.sleep(0.5)
+            # print("start checkkkkkkkkkkkkkkkkkkk")
+            # flag_check=testdef.detectPlate_check(cap,plate_order[i])
+            # # Time2=time.time()-Time1
+            # # print("Time2:",Time2)
+            # print("flag_chexk:",flag_check)
+            # if flag_check :  #如果夹到了继续下一个颜色
+            #     print("next colorrrrrrrrrrrrrrrrrrrr")
             #     i=i+1
-            # time.sleep(3)
-            # i=i+1
+            # else:  #没夹到仍等待第一个
+            #     testdef.sendMessage(ser,3)
+            # # else :
+            # #     time.sleep(3)
+            # #     i=i+1
+            # # time.sleep(3)
+            # # i=i+1
         # plate_time += 1  #轮数+1
         cv2.destroyAllWindows()
         recv=b'st'
@@ -681,7 +696,6 @@ while True:
         testdef.sendMessage(ser,40)
         time.sleep(0.01)
         testdef.sendMessage(ser,68)
-                # break
         line_flag=0        
         while True:
             recv_first=testdef.receiveMessage(ser)
@@ -894,6 +908,7 @@ while True:
 
 
         # cv2.destroyAllWindows()
+        testdef.defaltCorrectxy()
         recv=b'st'  #完成功能后进入空循环
 
 
@@ -1068,7 +1083,7 @@ while True:
         recv=b'st'  #完成功能后进入空循环
 
 
-####模拟使用--放置物料
+####模拟使用--放置物料--转盘圆环上放物料--先调整至准确位置，然后看颜色直接放三次
     elif recv==b'PP':
         i=0
         while not cap.isOpened():
@@ -1223,6 +1238,7 @@ while True:
         code_cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
         code_cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
         code_cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
+        code_cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
         if  not code_cap.isOpened():
             print("faillllllllll")
         ####初始化各个变量
