@@ -65,8 +65,8 @@ plate_order=[]
 # recv = b'AA'
 recv=''
 line_cishu =1
-get_order=[2,1,3]
-put_order=[2,1,3]
+get_order=[1,2,3]
+put_order=[1,2,3]
 get_order_blank=[]
 
 
@@ -94,7 +94,7 @@ while True:
 ####识别二维码、条形码
     if recv==b'AA': 
         time_c=time.time()
-        time_code=10
+        time_code=15
         code_end=0
         if code_cap.isOpened():
             print("11      successsssssssss")
@@ -210,7 +210,7 @@ while True:
         ####粗调 圆环粗定位和直线一起调整
         ####粗调开始计时
         Time1=time.time()   
-        time_together=7   #粗调超时
+        time_together=5   #粗调超时
         ####发送偏差值信息，调整车身位置直到超时或者直线圆环均到位
         while ((time.time()-Time1)<time_together) and ((not line_flag) or (not move_flag)) :
             theta,line_flag,detx,dety,move_flag=testdef.together_line_circle1(cap)
@@ -250,7 +250,7 @@ while True:
                 for j in range(2):
                     q=cap.grab()
                 Time3=time.time()
-                time_xi=6   #细调超时
+                time_xi=5   #细调超时
                 ####正常是6
                 ####细调第一步 颜色定五环
                 move_flag_color_1=0 
@@ -341,6 +341,7 @@ while True:
                 # theta1,line_flag1=testdef.detectLine(cap)
                 ret=cap.grab()
             theta,line_flag=testdef.detectLine_gray(cap)
+            # theta,line_flag=testdef.detectLine(cap)
             if line_flag ==0:   #到位后当次偏差值不发送
                 testdef.sendMessage5(ser,theta,0,0)
                 print("main li de theta:",theta)
@@ -471,11 +472,11 @@ while True:
         i=0
         while not cap.isOpened():
             print("Not open colorcap")
-        # if plate_time == 1:
-        #     plate_order=get_order
-        # elif plate_time == 2:
-        #     plate_order=put_order
-        plate_order=get_order
+        if plate_time == 1:
+            plate_order=get_order
+        elif plate_time == 2:
+            plate_order=put_order
+        # plate_order=get_order
         print("plate_order:",plate_order)
         stop_flag=0
         # i=0
@@ -506,43 +507,70 @@ while True:
             if  (flag2 == 1 and flag1 == 1):
             # if flag2==1: 
                 time_start=time.time()
-                while (not stop_flag_1 and (time.time()-time_start)<3.2):
+                while (not stop_flag_1 and (time.time()-time_start)<3):
                     x_,y_,img_,flag9,detx9,dety9,color = testdef.findBlockCenter_gray(cap)
                     print("qqqqqqqq:",abs(detx9),abs(dety9))
                     # if abs(detx9)<12 and abs(dety9)<12 and detx9!=0 and dety9!=0:
-                    if abs(detx9)<12 and abs(dety9)<12 and flag9==1:
+                    if abs(detx9)<4 and abs(dety9)<4 and flag9==1:
                         stop_flag_1=1
                         print("stop_flag_1:",stop_flag_1)
                     else:
                         testdef.sendMessage2(ser,detx9,dety9)
                         time.sleep(0.01)
                 if stop_flag_1==1:
-                    testdef.sendMessage(ser,16)
+                    testdef.sendMessage(ser,57)
                     time.sleep(4)
                 else:
                     print("chaoshilechaoshilechaoshilechaoshile")
                     time.sleep(2)
+        i=0
         while i<3:
+            # while not stop_flag:
+            #     print("i:",i)
+            # #     # if stop_flag_1==0:
+            #     flag2 = testdef.detectPlate(cap,plate_order[i])
+            #     x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,plate_order[i])
+            #     if  (flag2 == 1 and flag1 == 1):
+            #         # stop_flag=plate_order[i]
+            #         # if color==plate_order[i]:
+            #             stop_flag=1
+            #             if plate_order[i] == 1:
+            #                 testdef.sendMessage(ser,7)
+            #             elif plate_order[i] == 2:
+            #                 testdef.sendMessage(ser,8)
+            #             elif plate_order[i]== 3:
+            #                 testdef.sendMessage(ser,9)
+            color_=0
+            # if (plate_order[i]==1):
+            #     color_=2
+            # elif(plate_order[i]==2):
+            #     color_=3
+            # elif(plate_order[i]==3):
+            #     color_=1
+            if (plate_order[i]==1):
+                color_=3
+            elif(plate_order[i]==2):
+                color_=1
+            elif(plate_order[i]==3):
+                color_=2
             while not stop_flag:
-                print("i:",i)
-            #     # if stop_flag_1==0:
-                flag2 = testdef.detectPlate(cap,plate_order[i])
-                x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,plate_order[i])
+                flag2 = testdef.detectPlate(cap,color_)
+                x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,color_)
                 if  (flag2 == 1 and flag1 == 1):
-                    # stop_flag=plate_order[i]
-                    # if color==plate_order[i]:
-                        stop_flag=1
-                        if plate_order[i] == 1:
-                            testdef.sendMessage(ser,7)
-                        elif plate_order[i] == 2:
-                            testdef.sendMessage(ser,8)
-                        elif plate_order[i]== 3:
-                            testdef.sendMessage(ser,9)
-                    # testdef.sendMessage(ser,stop_flag)
-            # Time = time.time()
+                    x_last=x_
+                    y_last=y_
+                    while not stop_flag:
+                        x_,y_,img_,flag_,detx_,dety_,color_number= testdef.findBlockCenter_gray(cap)
+                        if abs(x_last-x_)<0.05 and abs(y_last-y_)<0.05:
+                            print("1")
+                            x_last=x_
+                            y_last=y_
+                        else:
+                            stop_flag=1
+            testdef.sendMessage(ser,119)
             stop_flag=0
             stop_flag_1=0
-            time.sleep(2)
+            time.sleep(5.5)
             i=i+1
         plate_time += 1
         cv2.destroyAllWindows()
@@ -639,7 +667,7 @@ while True:
                     # print("cutiao time:",time.time()-timee)
             print("xitiao11 okokokokokokokokok")
             move_flag_color_1=0   
-            #�ڶ�����ϸ��
+            # ڶ     ϸ  
             # while (not move_flag_color_2 and (time.time()-Time3)<time_xi):
             q=cap.grab()
             while ((time.time()-Time3)<time_xi ):
@@ -677,7 +705,7 @@ while True:
             print("Not open colorcap")
         #开始计时
         Time_l=time.time()
-        time_l=6
+        time_l=2
         #调整车身姿态直到直线到位或超时
         while (not line_flag and (time.time()-Time_l)<time_l):
         # while (not line_flag ):
@@ -704,7 +732,9 @@ while True:
                 break
         color_2=0
         flag1=0
-        while not flag1:
+        Time_xy=time.time()
+        time_xy=3
+        while (not flag1 and (time.time()-Time_xy)<time_xy):
             x_,y_,img_,flag1,detx,dety,color_2= testdef.findBlockCenter_get(cap)
             if  (flag1 == 0):
                 testdef.sendMessage5(ser,0,detx,dety)
@@ -829,7 +859,7 @@ while True:
                 for j in range(2):
                     q=cap.grab()
                 Time3=time.time()
-                time_xi=6
+                time_xi=4
                 #正常是6
                 #细调第一步 颜色定五环
                 while (not move_flag_color_1 and (time.time()-Time3)<time_xi):
@@ -846,60 +876,60 @@ while True:
                         print("cutiao time:",time.time()-timee)
                 print("xitiao11 okokokokokokokokok")
                 move_flag_color_1=0   
-                # #细调第二步 灰度定中心（第一版-无到位后二次检测
-                # while (not move_flag_color_2 and (time.time()-Time3)<time_xi):
-                # # while (not move_flag_color_2 ):
-                #     print("xxxxxxxx")
-                #     timeee=time.time()
-                #     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
-                #     if move_flag_color_2==0:
-                #         testdef.sendMessage2(ser,detx,dety)
-                #         print("xitiao time:",time.time()-timeee)
-                # print("xitiao22 okokokokokokokokok  move_flag_color_2:",move_flag_color_2)
-                # if circle_order[i] == 1:
-                #     testdef.sendMessage(ser,57)
-                # elif circle_order[i] == 2:
-                #     testdef.sendMessage(ser,64)
-                # elif circle_order[i] == 3:
-                #     testdef.sendMessage(ser,65)
-                #细调第二步 灰度定中心（第二版-到位后做二次检测-防止物料贴环边立即就放
-                move_flag_color_2_2=0
-                while (not move_flag_color_2_2 and (time.time()-Time3)<time_xi):
-                # while (not move_flag_color_2_2 ):
+                #细调第二步 灰度定中心（第一版-无到位后二次检测
+                while (not move_flag_color_2 and (time.time()-Time3)<time_xi):
+                # while (not move_flag_color_2 ):
                     print("xxxxxxxx")
-                    recv2=testdef.receiveMessage(ser)
-                    print("                        recvrecvrecvrecv22222:",recv2)
                     timeee=time.time()
                     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
-                    testdef.sendMessage2(ser,detx,dety)
                     if move_flag_color_2==0:
-                        # testdef.sendMessage2(ser,detx,dety)
+                        testdef.sendMessage2(ser,detx,dety)
                         print("xitiao time:",time.time()-timeee)
-                    else:
-                        detxx=0
-                        detyy=0
-                        flagg=0
-                        time_check=2
-                        #初次到位后再看一次是否还在中心内 若在则到位 若不在则继续调整
-                        for k in range(time_check):
-                            detx2,dety2,move_flag_color_22=testdef.circlePut1(cap)
-                            # testdef.sendMessage2(ser,detx2,dety2)
-                            # print("double check")
-                            detxx+=detx
-                            detyy+=dety
-                            flagg+=move_flag_color_22
-                            print("double check    flagg:",flagg)
-                        if flagg==time_check:
-                            move_flag_color_2_2=1
-                            break
                 print("xitiao22 okokokokokokokokok  move_flag_color_2:",move_flag_color_2)
-                #发送到位信息 根据颜色发送不同到位信息
                 if circle_order[i] == 1:
                     testdef.sendMessage(ser,57)
                 elif circle_order[i] == 2:
                     testdef.sendMessage(ser,64)
                 elif circle_order[i] == 3:
                     testdef.sendMessage(ser,65)
+                # #细调第二步 灰度定中心（第二版-到位后做二次检测-防止物料贴环边立即就放
+                # move_flag_color_2_2=0
+                # while (not move_flag_color_2_2 and (time.time()-Time3)<time_xi):
+                # # while (not move_flag_color_2_2 ):
+                #     print("xxxxxxxx")
+                #     recv2=testdef.receiveMessage(ser)
+                #     print("                        recvrecvrecvrecv22222:",recv2)
+                #     timeee=time.time()
+                #     detx,dety,move_flag_color_2=testdef.circlePut1(cap)
+                #     testdef.sendMessage2(ser,detx,dety)
+                #     if move_flag_color_2==0:
+                #         # testdef.sendMessage2(ser,detx,dety)
+                #         print("xitiao time:",time.time()-timeee)
+                #     else:
+                #         detxx=0
+                #         detyy=0
+                #         flagg=0
+                #         time_check=2
+                #         #初次到位后再看一次是否还在中心内 若在则到位 若不在则继续调整
+                #         for k in range(time_check):
+                #             detx2,dety2,move_flag_color_22=testdef.circlePut1(cap)
+                #             # testdef.sendMessage2(ser,detx2,dety2)
+                #             # print("double check")
+                #             detxx+=detx
+                #             detyy+=dety
+                #             flagg+=move_flag_color_22
+                #             print("double check    flagg:",flagg)
+                #         if flagg==time_check:
+                #             move_flag_color_2_2=1
+                #             break
+                # print("xitiao22 okokokokokokokokok  move_flag_color_2:",move_flag_color_2)
+                # #发送到位信息 根据颜色发送不同到位信息
+                # if circle_order[i] == 1:
+                #     testdef.sendMessage(ser,57)
+                # elif circle_order[i] == 2:
+                #     testdef.sendMessage(ser,64)
+                # elif circle_order[i] == 3:
+                #     testdef.sendMessage(ser,65)
                 time.sleep(0.01)
                 move_flag_color_2=0
                 i = i+1  #继续下一个颜色

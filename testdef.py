@@ -25,8 +25,8 @@ dim_gray_max=[180,255,255]
 
 #转盘夹取物料 物料面积大小系数  0.039
 block_area=0.039
-#粗调时
-cutiao_center_circle=0.016
+#粗调时0.016
+cutiao_center_circle=0.0097
 
 #放的偏右了x值就+，偏下了y值就-
 
@@ -35,7 +35,7 @@ cutiao_center_circle=0.016
 #cedingzhi 39 -9
 #42  -9
 #粗调时高度偏差值(findcontours)
-correct_x=36
+correct_x=42
 correct_y=-9
 
 #new paw
@@ -46,8 +46,8 @@ correct_y=-9
 #用了很久  43  7 
 #37  6
 #细调时高度的偏差值(houghcircles)
-correct_x_hough=36
-correct_y_hough=7
+correct_x_hough=37
+correct_y_hough=6
 #存储默认值
 correct_x_hough_default=correct_x_hough
 correct_y_hough_default=correct_y_hough
@@ -357,12 +357,12 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
     h, w = res1.shape[:2]
 
     #####################line图像处理#################################
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   #ת�Ҷ�ͼ
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   #ת Ҷ ͼ
     equalized = cv2.equalizeHist(gray)
     # cv2.imshow("junheng",equalized)
     # ret, thresh = cv2.threshold(equalized, 120, 255, cv2.THRESH_BINARY)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    opened = cv2.morphologyEx(equalized, cv2.MORPH_OPEN, kernel)#������
+    opened = cv2.morphologyEx(equalized, cv2.MORPH_OPEN, kernel)#      
     closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
     # closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
     blurred = cv2.GaussianBlur(closed1, (9, 9), 2)
@@ -556,8 +556,8 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
     # else:
     #     left=-2
     #     right=6
-
-    if (x_incolor<right and x_incolor>left) and abs(y_incolor)<6:
+    det=4
+    if (x_incolor)<det and abs(y_incolor)<det:
         if x_incolor == 0 and y_incolor==0:
             stop_flag=0
         else:
@@ -587,15 +587,15 @@ def findCountours(camera_cap):  #/没在用/  findcontours灰度识别圆心
     h, w = res1.shape[:2]
 
 
-    gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)   #ת�Ҷ�ͼ
+    gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)   #ת Ҷ ͼ
     equalized = cv2.equalizeHist(gray)
     # cv2.imshow("junheng",equalized)
     blurred = cv2.GaussianBlur(equalized, (9, 9), 2)
     edges = cv2.Canny(blurred, 50, 150)
     # circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 0.7,70,
-    #                         param1=100, param2=150, minRadius=50, maxRadius=0)    #ʶ��Բ��
+    #                         param1=100, param2=150, minRadius=50, maxRadius=0)    #ʶ  Բ  
     flag = 0
-    detx = 0 #�����Ĳ��
+    detx = 0 #     Ĳ  
     dety = 0
     detx1=0
     dety1=0
@@ -613,7 +613,7 @@ def findCountours(camera_cap):  #/没在用/  findcontours灰度识别圆心
     contours, _ = cv2.findContours(erzhi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
 
-# ��ʼ������
+#   ʼ      
     largest_circle = None
     largest_area = 0
 
@@ -622,20 +622,20 @@ def findCountours(camera_cap):  #/没在用/  findcontours灰度识别圆心
 
 
     for contour in contours:
-    # �������������
-    # ���������С����
+    #              
+    #          С    
         area = cv2.contourArea(contour)
         # print("area:",area)
         if area > largest_area:
             largest_area = area
             peri = cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
-            if len(approx) > 3:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
+            if len(approx) > 3:  # Բ εĽ  ƶ   α   Ӧ ô   8
                 largest_circle = approx
                 # print("largest area:",largest_area)
                 if largest_area > 10000 :
                     cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
-                    # ����Բ�ĺͰ뾶
+                    #     Բ ĺͰ뾶
                     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
                     print("x=",x,"y=",y)
                     center = (int(x), int(y))
@@ -646,7 +646,7 @@ def findCountours(camera_cap):  #/没在用/  findcontours灰度识别圆心
                     detx1 = int(round(detx))
                     dety1 = int(round(dety))
                     cv2.circle(res1, center, 2, (0, 0, 255), 3)
-                    # ����Բ
+                    #     Բ
                     cv2.circle(res1, center, radius, (0, 255, 0), 2)
                     center_text = f"({center[0]}, {center[1]}), radius: {radius}"
                     text_position = (center[0] + 10, center[1] - 10)
@@ -701,7 +701,7 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     h, w = res1.shape[:2]
 
     ################
-    ##Բ���ж�
+    ##Բ   ж 
     gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)   
     equalized = cv2.equalizeHist(gray)
     # cv2.imshow("junheng",equalized)
@@ -724,13 +724,13 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     #         if len(approx) > 7:  
     #             largest_circle = approx
 
-    # # ѭ�������󣬸��� largest_circle ��ֵ���������߼�
+    # # ѭ       󣬸    largest_circle   ֵ         ߼ 
     # if largest_circle is not None and largest_area > 10000:
     #     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
     #     center = (int(x), int(y))
     #     radius = int(radius)
-    #     cv2.circle(res1, center, 2, (0, 0, 255), 3)  # ����Բ��
-    #     cv2.circle(res1, center, radius, (0, 255, 0), 2)  # �������Բ
+    #     cv2.circle(res1, center, 2, (0, 0, 255), 3)  #     Բ  
+    #     cv2.circle(res1, center, radius, (0, 255, 0), 2)  #        Բ
     #     center_text = f"({center[0]}, {center[1]}), radius: {radius}"
     #     text_position = (center[0] + 10, center[1] - 10)
     #     area_text = f"Area: {largest_area}"
@@ -740,7 +740,7 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     #     cv2.putText(res1, 'No circle found', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
                     
     ################
-    ##��ɫ�ж�
+    ##  ɫ ж 
     red_min   = np.array([  0, 60,  60])
     red_max   = np.array([ 12, 203, 255])
     blue_min  = np.array([94,  50, 80])
@@ -751,15 +751,15 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)
     mask12 = cv2.inRange(hsv,   red_min,   red_max)
     mask11 = cv2.inRange(hsv,   red_min1,   red_max1)
-    mask1 = cv2.add(mask12,mask11)  #��ɫ����
-    mask3 = cv2.inRange(hsv,  blue_min,  blue_max)   #��ɫ����
+    mask1 = cv2.add(mask12,mask11)  #  ɫ    
+    mask3 = cv2.inRange(hsv,  blue_min,  blue_max)   #  ɫ    
     # mask_not_red_blue = cv2.bitwise_not(src1,src1,mask_notgreen)
     # cv2.imshow("not green",mask_not_red_blue)
-    # ���������еķ�����������
+    #          еķ           
     red_pixels = cv2.countNonZero(mask1)
     blue_pixels = cv2.countNonZero(mask3)
     print("red_pixels:",red_pixels,"blue_pixels:",blue_pixels)
-    #��Ҫ���ݾ�����뿴���Ĵ�С�ټ�һ��ʶ�����ظ�����Χ�ж�
+    #  Ҫ   ݾ     뿴   Ĵ С ټ һ  ʶ     ظ     Χ ж 
     color = None
     if red_pixels > blue_pixels:
         color = "Red"
@@ -767,7 +767,7 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
         color = "Blue"
     else:
         color = "Unknown"
-    #������ɫ
+    #      ɫ
     x_r=640
     y_r=0
     w_r=0
@@ -822,7 +822,7 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
                 if len(approx) > 7:  
                     largest_circle = approx
 
-        # ѭ�������󣬸��� largest_circle ��ֵ���������߼�
+        # ѭ       󣬸    largest_circle   ֵ         ߼ 
         if largest_circle is not None and largest_area > 10000:
             (x, y), radius = cv2.minEnclosingCircle(largest_circle)
             flag_incolor=i
@@ -834,8 +834,8 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
                 y=y+y_b
             center = (int(x), int(y))
             radius = int(radius)
-            cv2.circle(res1, center, 2, (0, 0, 255), 3)  # ����Բ��
-            cv2.circle(res1, center, radius, (0, 255, 0), 2)  # �������Բ
+            cv2.circle(res1, center, 2, (0, 0, 255), 3)  #     Բ  
+            cv2.circle(res1, center, radius, (0, 255, 0), 2)  #        Բ
             center_text = f"({center[0]}, {center[1]}), radius: {radius}"
             text_position = (center[0] + 10, center[1] - 10)
             area_text = f"Area: {largest_area}"
@@ -864,17 +864,17 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     # if radius:
     #     # if x<(x_b+w_b) or x>x_r:   
     #     if x>x_r:
-    #         move_direction=1   #����
+    #         move_direction=1   #    
     #         move_distance = 11111
     #     elif x<(x_b+w_b):
-    #         move_direction=2   #����
+    #         move_direction=2   #    
     #         move_distance = 11111
     else:
         if color == 'Red':
-            move_direction=1   #����
+            move_direction=1   #    
             move_distance = 22222
         elif color == 'Blue':
-            move_direction=2   #����
+            move_direction=2   #    
             move_distance = 22222
     # green_min =  np.array(dim_green_min)
     # green_max =  np.array(dim_green_max)
@@ -1125,7 +1125,7 @@ def circlePut_color(color_cap,color_number):  #细调第一步 颜色画框确�
     #     detx_p = int(detx_p)
     #     dety_p = int(dety_p)
     #     # print("detx_p:",detx_p,"dety_p:",dety_p)
-    if abs(detx_p)<12 and abs(dety_p)<12:
+    if abs(detx_p)<6 and abs(dety_p)<6:
         flag_color_1 =1
     if (detx_p==10000) and (dety_p==10000):
         detx_p=0
@@ -1313,18 +1313,18 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     cv2.imshow("res1",res1)
 
     h, w = res1.shape[:2]
-    blured = cv2.blur(res1, (7, 7))#�˲�
+    blured = cv2.blur(res1, (7, 7))# ˲ 
     blured = cv2.blur(res1, (5, 5))
-    ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#��ֵ��
+    ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#  ֵ  
     
     gray = cv2.cvtColor(bright, cv2.COLOR_BGR2GRAY)
     h_g, w_g = gray.shape[:2]
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#������
+    opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#      
     closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
     closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
 
-    contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#����������ڻ�ȡɫ�鷶Χ
+    contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#          ڻ ȡɫ 鷶Χ
     num = 0
     a_sum=0
     b_sum=0
@@ -1342,7 +1342,7 @@ def findBlockCenter_get(color_cap):  #一排三个处夹取（不在转盘
     for cnt343 in contours:
         (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  
         area = cv2.contourArea(cnt343)
-        if w1*h1 > 0.05*w*h:
+        if w1*h1 > 0.016*w*h:
         # if area > 0.07*w*h:
             a = x1 + w1 / 2
             b = y1 + h1 / 2
@@ -1528,58 +1528,58 @@ def findBlockCenter_gray(color_cap):   #在转盘上放物料（转盘上是色�
     # hsv = cv2.cvtColor(src1, cv2.COLOR_BGR2HSV)
     cv2.imshow("res1",res1)
 
-    gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)   
-    # equalized = cv2.equalizeHist(gray)  # 直方图均衡化
-    gamma=0.5
-    invgamma = 1/gamma
-    gamma_image = np.array(np.power((gray/255), invgamma)*255, dtype=np.uint8)
-    cv2.imshow("gamma",gamma_image)
-    blurred1 = cv2.GaussianBlur(gamma_image, (9, 9), 2)  # 高斯模糊
-    circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
-                            param1=100, param2=65, minRadius=houghradius_min, maxRadius=houghradius_max)    #5th circle
+    # gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)   
+    # # equalized = cv2.equalizeHist(gray)  # 直方图均衡化
+    # gamma=0.5
+    # invgamma = 1/gamma
+    # gamma_image = np.array(np.power((gray/255), invgamma)*255, dtype=np.uint8)
+    # cv2.imshow("gamma",gamma_image)
+    # blurred1 = cv2.GaussianBlur(gamma_image, (9, 9), 2)  # 高斯模糊
+    # circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7,70,
+    #                         param1=100, param2=65, minRadius=houghradius_min, maxRadius=houghradius_max)    #5th circle
 
 
-    #124 155
-    x=0
-    y=0
-    detx = 0 
-    dety = 0
-    detx1 = 0
-    dety1 = 0
-    largest_circle = None  
-    stop_flag=0
-    if circles is not None:
-        flag = 1
-        circles = np.uint16(np.around(circles))
-        for i in circles[0, :]:
-            if largest_circle is None or i[2] > largest_circle[2]:
-                largest_circle = i  
+    # #124 155
+    # x=0
+    # y=0
+    # detx = 0 
+    # dety = 0
+    # detx1 = 0
+    # dety1 = 0
+    # largest_circle = None  
+    # stop_flag=0
+    # if circles is not None:
+    #     flag = 1
+    #     circles = np.uint16(np.around(circles))
+    #     for i in circles[0, :]:
+    #         if largest_circle is None or i[2] > largest_circle[2]:
+    #             largest_circle = i  
 
 
-        if largest_circle is not None:
-            x=largest_circle[0]
-            y=largest_circle[1]
-            cv2.circle(res1, (largest_circle[0], largest_circle[1]), largest_circle[2], (0, 0, 255), 2)
-            cv2.circle(res1, (largest_circle[0], largest_circle[1]), 2, (0, 0, 255), 3)
-            # center_text = f"({largest_circle[0]}, {largest_circle[1]})"
-            # text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
-            # cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            # radius = largest_circle[2]
-            # radius_text = f"Radius: {radius}"
-            # radius_position = (largest_circle[0] + 10, largest_circle[1] + 20) 
-            # cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-            detx = largest_circle[0] - w/2 -correct_x_hough
-            dety = h/2 - largest_circle[1] -correct_y_hough
-            detx1 = int(round(detx))
-            dety1 = int(round(dety))
-            flag_color_1 = 1
-            # print("detx=",detx,"dety=",dety)
-            print("detx1=",detx1,"dety1=",dety1)
-    else:
-        cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    #     if largest_circle is not None:
+    #         x=largest_circle[0]
+    #         y=largest_circle[1]
+    #         cv2.circle(res1, (largest_circle[0], largest_circle[1]), largest_circle[2], (0, 0, 255), 2)
+    #         cv2.circle(res1, (largest_circle[0], largest_circle[1]), 2, (0, 0, 255), 3)
+    #         # center_text = f"({largest_circle[0]}, {largest_circle[1]})"
+    #         # text_position = (largest_circle[0] + 10, largest_circle[1] - 10)
+    #         # cv2.putText(edges, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+    #         # radius = largest_circle[2]
+    #         # radius_text = f"Radius: {radius}"
+    #         # radius_position = (largest_circle[0] + 10, largest_circle[1] + 20) 
+    #         # cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+    #         detx = largest_circle[0] - w/2 -correct_x_hough
+    #         dety = h/2 - largest_circle[1] -correct_y_hough
+    #         detx1 = int(round(detx))
+    #         dety1 = int(round(dety))
+    #         flag_color_1 = 1
+    #         # print("detx=",detx,"dety=",dety)
+    #         print("detx1=",detx1,"dety1=",dety1)
+    # else:
+    #     cv2.putText(res1, 'no', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
     
-    cv2.imshow("res1",res1)
-    cv2.waitKey(1)
+    # cv2.imshow("res1",res1)
+    # cv2.waitKey(1)
 
     #red
     # x_r=0
@@ -1634,19 +1634,19 @@ def findBlockCenter_gray(color_cap):   #在转盘上放物料（转盘上是色�
 
 
     # h, w = res1.shape[:2]
-    # blured = cv2.blur(res1, (7, 7))#�˲�
+    # blured = cv2.blur(res1, (7, 7))# ˲ 
     # blured = cv2.blur(res1, (5, 5))
-    # ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#��ֵ��
+    # ret, bright = cv2.threshold(blured, 10, 255, cv2.THRESH_BINARY)#  ֵ  
     
     # gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)
     # h_g, w_g = gray.shape[:2]
     # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    # opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#������
+    # opened = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)#      
     # closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
     # closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
     # cv2.imshow("closed",closed)
 
-    # contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#����������ڻ�ȡɫ�鷶Χ
+    # contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#          ڻ ȡɫ 鷶Χ
     # num = 0
     # a_sum=0
     # b_sum=0
@@ -1660,7 +1660,7 @@ def findBlockCenter_gray(color_cap):   #在转盘上放物料（转盘上是色�
     # detx_p=0
     # dety_p=0
     # for cnt343 in contours:
-    #     (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  # �ú������ؾ����ĸ���
+    #     (x1, y1, w1, h1) = cv2.boundingRect(cnt343)  #  ú      ؾ    ĸ   
     #     area = cv2.contourArea(cnt343)
     #     if w1*h1 > 0.07*w*h:
     #     # if area > 0.07*w*h:
@@ -1672,7 +1672,7 @@ def findBlockCenter_gray(color_cap):   #在转盘上放物料（转盘上是色�
     #         # print("color",num,":",a/w, b/h)
     #         # s=(x1+w1)*(y1+h1)
             
-    #         cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
+    #         cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  #     ⵽    ɫ      
     #         cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     #         # area_text=f"{area}"
     #         area_text=f"{w1*h1}"
@@ -1692,71 +1692,72 @@ def findBlockCenter_gray(color_cap):   #在转盘上放物料（转盘上是色�
     #         dety_p = h/2 - correct_y_hough - b
     #         detx_p = int(detx_p)
     #         dety_p = int(dety_p)
-    # gray = cv2.cvtColor(src1, cv2.COLOR_BGR2GRAY)   #ת�Ҷ�ͼ
-    # equalized = cv2.equalizeHist(gray)
-    # # cv2.imshow("junheng",equalized)
-    # blurred = cv2.GaussianBlur(equalized, (9, 9), 2)
-    # detx = 0 #�����Ĳ��
-    # dety = 0
-    # detx1=0
-    # dety1=0
 
-    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    # opened = cv2.morphologyEx(blurred, cv2.MORPH_CLOSE, kernel)
-    # closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
-    # closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
-    # edges1 = cv2.Canny(blurred, 50, 150)
-    # cv2.imshow("blu",blurred)
-    # cv2.imshow("edges1",edges1)
-    # edges1 = cv2.Canny(blurred, 50, 150)
-    # cv2.imshow("blu",blurred)
-    ################cv2.imshow("edges1",edges1)
-    # contours, _ = cv2.findContours(edges1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# ��ʼ������
-    # largest_circle = None
-    # largest_area = 0
+    gray = cv2.cvtColor(src1, cv2.COLOR_BGR2GRAY)   #ת Ҷ ͼ
+    equalized = cv2.equalizeHist(gray)
+    # cv2.imshow("junheng",equalized)
+    blurred = cv2.GaussianBlur(equalized, (9, 9), 2)
+    detx = 0 #     Ĳ  
+    dety = 0
+    detx1=0
+    dety1=0
 
-    # move_flag = 0
-    # stop_flag = 0
-    # x=0
-    # y=0
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    opened = cv2.morphologyEx(blurred, cv2.MORPH_CLOSE, kernel)
+    closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
+    closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
+    edges1 = cv2.Canny(blurred, 50, 150)
+    cv2.imshow("blu",blurred)
+    cv2.imshow("edges1",edges1)
+    edges1 = cv2.Canny(blurred, 50, 150)
+    cv2.imshow("blu",blurred)
+    ###############cv2.imshow("edges1",edges1)
+    contours, _ = cv2.findContours(edges1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+   
+    largest_circle = None
+    largest_area = 0
 
-    # for contour in contours:
-    # # �������������
-    # # ���������С����
-    #     area = cv2.contourArea(contour)
-    #     # print("area:",area)
-    #     if area > largest_area:
-    #         largest_area = area
-    #         peri = cv2.arcLength(contour, True)
-    #         approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
-    #         if len(approx) > 5:  # Բ�εĽ��ƶ���α���Ӧ�ô���8
-    #             largest_circle = approx
-    #             # print("largest area:",largest_area)
-    # if largest_area > 10000 and largest_circle is not None:
-    #     cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
-    #     # ����Բ�ĺͰ뾶
-    #     (x, y), radius = cv2.minEnclosingCircle(largest_circle)
-    #     # print("x=",x,"y=",y)
-    #     center = (int(x), int(y))
-    #     radius = int(radius)
-    #     detx = x - w/2 - correct_x
-    #     dety = h/2 - correct_y - y
-    #     # print("detx=",detx,"dety=",dety)
-    #     detx1 = int(round(detx))
-    #     dety1 = int(round(dety))
-    #     cv2.circle(res1, center, 2, (0, 0, 255), 3)
-    #     # ����Բ
-    #     cv2.circle(res1, center, radius, (0, 255, 0), 2)
-    #     center_text = f"({center[0]}, {center[1]}), radius: {radius}"
-    #     text_position = (center[0] + 10, center[1] - 10)
-    #     area_text=f"({largest_area})"
-    #     cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-    #     cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-    #     # print('  detx1:',detx1,'  dety1:',dety1)
+    move_flag = 0
+    stop_flag = 0
+    x=0
+    y=0
 
-    #     flag_color_1 = 1
+    for contour in contours:
+    #              
+    #          С    
+        area = cv2.contourArea(contour)
+        # print("area:",area)
+        if area > largest_area:
+            largest_area = area
+            peri = cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+            if len(approx) > 5:  # Բ εĽ  ƶ   α   Ӧ ô   8
+                largest_circle = approx
+                # print("largest area:",largest_area)
+    if largest_area > 10000 and largest_circle is not None:
+        cv2.drawContours(res1, [largest_circle], 0, (0, 0, 255), 3)
+        #     Բ ĺͰ뾶
+        (x, y), radius = cv2.minEnclosingCircle(largest_circle)
+        # print("x=",x,"y=",y)
+        center = (int(x), int(y))
+        radius = int(radius)
+        detx = x - w/2 - correct_x_hough
+        dety = h/2 - correct_y_hough - y
+        # print("detx=",detx,"dety=",dety)
+        detx1 = int(round(detx))
+        dety1 = int(round(dety))
+        cv2.circle(res1, center, 2, (0, 0, 255), 3)
+        #     Բ
+        cv2.circle(res1, center, radius, (0, 255, 0), 2)
+        center_text = f"({center[0]}, {center[1]}), radius: {radius}"
+        text_position = (center[0] + 10, center[1] - 10)
+        area_text=f"({largest_area})"
+        cv2.putText(res1, center_text, text_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+        cv2.putText(res1, area_text, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        # print('  detx1:',detx1,'  dety1:',dety1)
+
+        flag_color_1 = 1
     
     return x/w,y/h,frame,flag_color_1,detx1,dety1,color_number
 
@@ -1820,7 +1821,7 @@ def findBlockCenter_circle(color_cap,color_number):   #在转盘上放物料（�
     x_center=0
     y_center=0
     flag_color_1=0
-    largest_circle = None  # ���ڴ洢���Բ����Ϣ
+    largest_circle = None  #    ڴ洢   Բ    Ϣ
     stop_flag=0
     if circles is not None:
         flag = 1
@@ -1885,7 +1886,7 @@ def findBlockCenter_circle(color_cap,color_number):   #在转盘上放物料（�
 
 
 
-    # contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#����������ڻ�ȡɫ�鷶Χ
+    # contours, hierarchy = cv2.findContours(closed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)#          ڻ ȡɫ 鷶Χ
     # num = 0
     # a_sum=0
     # b_sum=0
@@ -1904,8 +1905,8 @@ def findBlockCenter_circle(color_cap,color_number):   #在转盘上放物料（�
 
 
     # for contour in contours:
-    # # �������������
-    # # ���������С����
+    # #              
+    # #          С    
     #     area = cv2.contourArea(contour)
     #     # print("area:",area)
     #     if area > largest_area:
@@ -1916,7 +1917,7 @@ def findBlockCenter_circle(color_cap,color_number):   #在转盘上放物料（�
     #     x_center = x1 + w1 / 2
     #     y_center = y1 + h1 / 2
     #     print("area:",w1*h1)
-    #     cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  # ����⵽����ɫ������
+    #     cv2.rectangle(src1, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)  #     ⵽    ɫ      
     #     cv2.putText(src1, 'color', (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     #     area_text=f"{area}"
     #     cv2.putText(src1, area_text, (x1+60, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -2086,26 +2087,26 @@ def detectLine(cap):   #直线检测
 
     cnt_line = 0
     res1=frame.copy()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   #ת�Ҷ�ͼ
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   #ת Ҷ ͼ
     equalized = cv2.equalizeHist(gray)
     # cv2.imshow("junheng",equalized)
     # ret, thresh = cv2.threshold(equalized, 120, 255, cv2.THRESH_BINARY)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    opened = cv2.morphologyEx(equalized, cv2.MORPH_CLOSE, kernel)#������
+    opened = cv2.morphologyEx(equalized, cv2.MORPH_CLOSE, kernel)#      
     closed1 = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
     # closed = cv2.morphologyEx(closed1, cv2.MORPH_CLOSE, kernel)
     blurred = cv2.GaussianBlur(closed1, (9, 9), 2)
     edges = cv2.Canny(blurred, 50, 150)
     cv2.imshow("edges",edges)
 
-    lines = cv2.HoughLines(edges,1,np.pi/180,threshold =150)#��ȡͼ�е���
+    lines = cv2.HoughLines(edges,1,np.pi/180,threshold =150)#  ȡͼ е   
     cnt = 0
     sumTheta = 0
     averageTheta = 0
     # global last_theta
     last_theta = 0
     if lines is not None:
-        for line in lines:#��ÿ���߻�����
+        for line in lines:#  ÿ   ߻     
             rho,theta = line[0]
             
             if ((np.abs(theta)>=1.1) & (np.abs(theta)<=2.2)):
@@ -2122,33 +2123,33 @@ def detectLine(cap):   #直线检测
                 y2 = int(y0 - 1000 * (a))
                 cv2.line(res1,(x1,y1),(x2,y2),(0,0,255),2)
 
-    cnt = 0
-    sumTheta = 0
-    averageTheta = 0
-    # global last_theta
-    last_theta = 0
+    # cnt = 0
+    # sumTheta = 0
+    # averageTheta = 0
+    # # global last_theta
+    # last_theta = 0
 
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=150, minLineLength=250, maxLineGap=80)
-    if lines is not None:
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
+    # lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=150, minLineLength=250, maxLineGap=80)
+    # if lines is not None:
+    #     for line in lines:
+    #         x1, y1, x2, y2 = line[0]
             
-            # 计算线段的角度
-            if x2 != x1:  # 避免除以零
-                theta = np.arctan2(y2 - y1, x2 - x1)
-            else:
-                theta = np.pi / 2  # 垂直线，角度为 90 度（π/2 弧度）
+    #         # 计算线段的角度
+    #         if x2 != x1:  # 避免除以零
+    #             theta = np.arctan2(y2 - y1, x2 - x1)
+    #         else:
+    #             theta = np.pi / 2  # 垂直线，角度为 90 度（π/2 弧度）
             
-            # 筛选角度在 1.1 到 2.2 弧度之间的线段
-            if 1.1 <= np.abs(theta) <= 2.2:
-                cnt += 1
-                sumTheta += theta / 5.0  # 或者直接加上 theta，取决于你的需求
+    #         # 筛选角度在 1.1 到 2.2 弧度之间的线段
+    #         if 1.1 <= np.abs(theta) <= 2.2:
+    #             cnt += 1
+    #             sumTheta += theta / 5.0  # 或者直接加上 theta，取决于你的需求
                 
-                # 绘制线段
-                cv2.line(res1, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    #             # 绘制线段
+    #             cv2.line(res1, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     if not (cnt == 0):
-        averageTheta = 5.0 * sumTheta / cnt #��ýǶȵ�ƽ��ֵ
+        averageTheta = 5.0 * sumTheta / cnt #  ýǶȵ ƽ  ֵ
         # averageTheta = sumTheta / cnt
         last_theta =  averageTheta
     else :
