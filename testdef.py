@@ -35,19 +35,19 @@ cutiao_center_circle=0.0097
 #cedingzhi 39 -9
 #42  -9
 #粗调时高度偏差值(findcontours)
-correct_x=42
-correct_y=-9
+correct_x=40
+correct_y=-7
 
 #new paw
 #cedingzhi 33 9
-#celiangzhi 42 5
+#celiangzhi 42
 #houghcircles 43 7
 #20thin---y=16
 #用了很久  43  7 
 #37  6
 #细调时高度的偏差值(houghcircles)
-correct_x_hough=37
-correct_y_hough=6
+correct_x_hough=45
+correct_y_hough=7
 #存储默认值
 correct_x_hough_default=correct_x_hough
 correct_y_hough_default=correct_y_hough
@@ -69,6 +69,10 @@ houghradius_max=212
 # 1280/720----
 houghradius_min_6th=209
 houghradius_max_6th=233
+
+g_prev_smoothed_circle = None
+g_smooth_factor = 0.25
+g_distance_threshold_factor = 1.0
 
 ###########################################################################################
 ###########################################################################################
@@ -98,7 +102,7 @@ def receiveMessage(ser):  #接收信息
     else:
         recv_data = None
     ser.flushInput()
-    time.sleep(0.1)
+    time.sleep(0.01)
     return recv_data
 
 
@@ -116,7 +120,7 @@ def sendMessage(ser,data):  #发送到位信息（单个正数
     # ser.write(bytes.fromhex(data_hex))
     ser.write(data_1)
     print(data_1)
-    time.sleep(0.01)
+    time.sleep(0.001)
     # ser.write(data_1)
 
     return 0
@@ -176,7 +180,7 @@ def sendMessage2(ser, data1, data2):   #发送圆环中心 分辨率为大数 �
     data_pack = signal1_bytes + data1_bytes + signal2_bytes + data2_bytes + end
     ser.write(data_pack)
     print(data_pack.hex().upper())  # 打印十六进制格式
-    time.sleep(0.1)
+    time.sleep(0.001)
 
     return 0
 
@@ -221,7 +225,7 @@ def sendMessage4(ser,data1):   #/没在用/ 发送直线角度（单个数字带
     data_pack = signal_hex1+data_hex1
     ser.write(bytes.fromhex(data_pack))
     print("angle direction:",data_pack)
-    time.sleep(0.1)
+    time.sleep(0.001)
 
     return 0
 
@@ -313,7 +317,7 @@ def sendMessage5(ser, data_l, data_x, data_y):   #发送偏差值 粗调 直线+
     data_pack = signal_l_bytes + data_l_bytes + signal_x_bytes + data_x_bytes + signal_y_bytes + data_y_bytes + end
     ser.write(data_pack)
     print("together:", data_pack.hex().upper())  # 打印十六进制格式
-    time.sleep(0.1)
+    time.sleep(0.001)
     return 0
 
 def sendMessage6(ser, data):    #发送从右到左颜色（在一条直线三个圆环处夹取物料
@@ -347,9 +351,9 @@ def sendMessage6(ser, data):    #发送从右到左颜色（在一条直线三�
 flag_in=0
 cutiaocishu=0
 def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆环-绿色
-    ret=cap.grab()
-    ret=cap.grab()
-    ret=cap.grab()
+    # ret=cap.grab()
+    # ret=cap.grab()
+    # ret=cap.grab()
     ret,frame = cap.read()
 
 
@@ -557,7 +561,7 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
     #     left=-2
     #     right=6
     det=4
-    if (x_incolor)<det and abs(y_incolor)<det:
+    if abs(x_incolor)<det and abs(y_incolor)<det:
         if x_incolor == 0 and y_incolor==0:
             stop_flag=0
         else:
@@ -889,12 +893,12 @@ def findContours_ifgreen(camera_cap):  #/没在用/  圆环粗调 找绿色部�
     return move_direction,move_distance
     
 
-def circlePut1(cap):  #细调第二步 灰度houghcircles识别圆心
+def circlePut2(cap):  #细调第二步 灰度houghcircles识别圆心
     # success, frame = cap.read()
     # success, frame = cap.read()
-    success = cap.grab()
-    success = cap.grab()
-    success = cap.grab()
+    # success = cap.grab()
+    # success = cap.grab()
+    # success = cap.grab()
     success, frame = cap.read()
     # corrected_frame=undistortion(frame,mtx,dist)  # 图像去畸变（如果需要）
     # cv2.imshow("corrected",frame)
@@ -1021,6 +1025,149 @@ def circlePut1(cap):  #细调第二步 灰度houghcircles识别圆心
     cv2.waitKey(1)
     return detx1, dety1, stop_flag
 
+def circlePut1(cap):  # 细调第二步 灰度houghcircles识别圆心
+    # success, frame = cap.read() # 读取多次是为了确保获取最新帧，但一次通常也够
+    success, frame = cap.read()
+    if not success or frame is None:
+        print("Failed to read frame in circlePut1")
+        return 0, 0, 0 # 返回默认值表示失败
+
+    src1 = frame.copy()
+    res1 = src1.copy()
+    h, w = res1.shape[:2]
+
+    # 转换到灰度图并进行伽马校正增强对比度
+    gray = cv2.cvtColor(res1, cv2.COLOR_BGR2GRAY)
+    gamma = 0.5
+    invgamma = 1 / gamma
+    gamma_image = np.array(np.power((gray / 255.0), invgamma) * 255, dtype=np.uint8)
+    cv2.imshow("gamma", gamma_image)
+
+    # 高斯模糊
+    blurred1 = cv2.GaussianBlur(gamma_image, (9, 9), 2)
+    # 忽略图像边缘区域，防止误识别
+    blurred1[:, :200] = 0
+    blurred1[:, 1160:1280] = 0 # 假设图像宽度为1280，这里根据你的实际分辨率调整
+    cv2.imshow("blurred1", blurred1)
+
+    # 使用HoughCircles检测圆
+    # param1: Canny边缘检测的高阈值，低阈值是其一半
+    # param2: 累加器阈值，越小表示检测到的圆越多
+    circles = cv2.HoughCircles(blurred1, cv2.HOUGH_GRADIENT, 0.7, 70,
+                               param1=100, param2=83, minRadius=houghradius_min, maxRadius=houghradius_max)
+
+    largest_circle_raw = None  # 存储本次检测到的最大圆的原始数据
+    # if circles is not None:
+    #     circles = np.uint16(np.around(circles))
+    #     # 找到本次检测到的最大圆
+    #     for i in circles[0, :]:
+    #         if largest_circle_raw is None or i[2] > largest_circle_raw[2]:
+    #             largest_circle_raw = tuple(i) # 转换为元组以便于后续处理
+    if circles is not None:
+        # ʹ���з�������ת�� (�ؼ��޸�!)
+        circles_rounded = np.round(circles[0]).astype(np.int32)
+        
+        valid_circles = []
+        for circle in circles_rounded:
+            x, y, r = circle
+            # ������Ч�Լ�� (��������)
+            # ȷ��Բ����ͼ��Χ�ڣ��뾶�ں�������
+            if (0 <= x < w and 0 <= y < h and 
+                houghradius_min <= r <= houghradius_max):
+                valid_circles.append((x, y, r))
+        
+        # Ѱ�����Բ�����뾶��
+        if valid_circles:
+            largest_circle_raw = max(valid_circles, key=lambda c: c[2])
+
+    # =====================================================================
+    # 应用时间滤波（平滑处理）
+    global g_prev_smoothed_circle, g_smooth_factor, g_distance_threshold_factor
+
+    # 用于显示和计算的圆环数据
+    circle_to_use = None
+
+    if largest_circle_raw is not None:
+        curr_x, curr_y, curr_r = largest_circle_raw
+
+        if g_prev_smoothed_circle is None:
+            # 如果是第一次检测到圆环，或者之前没有历史数据，直接使用当前检测结果
+            g_prev_smoothed_circle = largest_circle_raw
+        else:
+            prev_x, prev_y, prev_r = g_prev_smoothed_circle
+
+            # 计算当前检测到的圆环与上一次平滑圆环之间的距离
+            distance = np.sqrt((curr_x - prev_x)**2 + (curr_y - prev_y)**2)
+
+            # 设定一个动态的距离阈值，基于当前圆环或上一次平滑圆环的半径
+            # 如果距离在阈值范围内，则进行平滑
+            # 这里的 max(curr_r, prev_r) 确保阈值是基于较大的半径，更容忍跳变
+            threshold = max(curr_r, prev_r) * g_distance_threshold_factor
+
+            if distance < threshold:
+                # 应用指数平滑
+                smoothed_x = int(round(g_smooth_factor * prev_x + (1 - g_smooth_factor) * curr_x))
+                smoothed_y = int(round(g_smooth_factor * prev_y + (1 - g_smooth_factor) * curr_y))
+                smoothed_r = int(round(g_smooth_factor * prev_r + (1 - g_smooth_factor) * curr_r))
+                g_prev_smoothed_circle = (smoothed_x, smoothed_y, smoothed_r)
+            else:
+                # 如果距离过大，表示圆环可能发生了较大跳变或重新出现
+                # 此时重置平滑器，直接使用当前检测到的圆环数据作为新的起始点
+                print(f"Warning: Large jump detected for circle. Distance: {distance:.2f}, Threshold: {threshold:.2f}. Resetting filter.")
+                g_prev_smoothed_circle = largest_circle_raw
+        
+        circle_to_use = g_prev_smoothed_circle
+    else:
+        # 如果当前帧未检测到圆环，重置历史平滑数据
+        g_prev_smoothed_circle = None
+
+    # =====================================================================
+
+    flag = 0  # 初始标志位，表示未检测到有效圆环
+    detx = 0  # x方向偏差
+    dety = 0  # y方向偏差
+    detx1 = 0 # 整数化后的x偏差
+    dety1 = 0 # 整数化后的y偏差
+    radius = 0 # 圆环半径
+    stop_flag = 0  # 停止标志位
+
+    if circle_to_use is not None:
+        flag = 1 # 检测到有效圆环，设置标志位
+        
+        # 绘制平滑后的圆心和圆
+        cv2.circle(res1, (circle_to_use[0], circle_to_use[1]), circle_to_use[2], (0, 0, 255), 2)
+        cv2.circle(res1, (circle_to_use[0], circle_to_use[1]), 2, (0, 0, 255), 3)
+        
+        radius = circle_to_use[2]
+        radius_text = f"Radius: {radius}"
+        radius_position = (circle_to_use[0] + 10, circle_to_use[1] + 20)
+        cv2.putText(res1, radius_text, radius_position, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+
+        # 计算偏差，使用平滑后的圆环坐标
+        detx = circle_to_use[0] - w/2 - correct_x_hough
+        dety = h/2 - circle_to_use[1] - correct_y_hough
+        detx1 = int(round(detx))
+        dety1 = int(round(dety))
+        print("detx=", detx, "dety=", dety)
+    else:
+        # 如果未检测到圆环（或平滑后为空），显示提示信息
+        cv2.putText(res1, 'no circle detected', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        # 此时detx1, dety1, radius 保持为0，flag为0
+
+    cv2.imshow("2", res1) # 显示结果
+    
+    # 判断是否停止
+    # 如果平滑后的中心点偏差在阈值内，则认为到位
+    if abs(detx) < 3 and abs(dety) < 3 and flag == 1: # 确保有检测到圆环才算到位
+        stop_flag = 1
+    else:
+        stop_flag = 0
+
+    print("detx1=", detx1, "dety1=", dety1, "stop_flag:", stop_flag)
+    cv2.waitKey(1)
+    return detx1, dety1, stop_flag
+
+
 def circlePut_color(color_cap,color_number):  #细调第一步 颜色画框确保第五环能被看见
     red_min   =  np.array(dim_red_min)
     red_max   =  np.array(dim_red_max)
@@ -1031,9 +1178,9 @@ def circlePut_color(color_cap,color_number):  #细调第一步 颜色画框确�
     red_min1   = np.array(dim_red_min1)  
     red_max1   = np.array(dim_red_max1)
     # ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
     ret,frame = color_cap.read()
 
     src1 = frame.copy()
@@ -1125,9 +1272,12 @@ def circlePut_color(color_cap,color_number):  #细调第一步 颜色画框确�
     #     detx_p = int(detx_p)
     #     dety_p = int(dety_p)
     #     # print("detx_p:",detx_p,"dety_p:",dety_p)
-    if abs(detx_p)<6 and abs(dety_p)<6:
+    if abs(detx_p)<50 and abs(dety_p)<50:
         flag_color_1 =1
     if (detx_p==10000) and (dety_p==10000):
+        detx_p=0
+        dety_p=0
+    if (abs(detx_p)>250) :
         detx_p=0
         dety_p=0
     cv2.imshow("src1",src1)
@@ -1394,9 +1544,9 @@ def findBlockCenter(color_cap,color_number):   #转盘处识别色块中心位�
     blue_max  =  np.array(dim_blue_max)  
     red_min1   = np.array(dim_red_min1)  
     red_max1   = np.array(dim_red_max1)
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
     ret,frame = color_cap.read()
 
     src1 = frame.copy()
@@ -2080,9 +2230,9 @@ def detectPlate_circle(camera_cap,color_number):   #检测转盘是否停止（�
     return flag_stop
 
 def detectLine(cap):   #直线检测
-    ret=cap.grab()
-    ret=cap.grab()
-    ret=cap.grab()
+    # ret=cap.grab()
+    # ret=cap.grab()
+    # ret=cap.grab()
     ret,frame = cap.read()
 
     cnt_line = 0
@@ -2174,9 +2324,9 @@ def detectLine_gray(color_cap):   #直线检测（黄灰交界线
     gray_min = np.array(dim_gray_min)
     gray_max = np.array(dim_gray_max)
 
-    ret = color_cap.grab()
-    ret = color_cap.grab()
-    ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
+    # ret = color_cap.grab()
     ret,frame = color_cap.read()
 
     

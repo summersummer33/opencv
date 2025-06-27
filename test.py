@@ -24,7 +24,7 @@ cap.set(4, 720)#��
 # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
 # cap.set(cv2.CAP_PROP_EXPOSURE, float(0.6)) 
 cap.set(cv2.CAP_PROP_BRIGHTNESS,10)
-# cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
 # ret = cap.grab()
 
 
@@ -42,18 +42,18 @@ ser=testdef.serialInit()
 
 i=0
 while True:
-    # Time1=time.time()
-    success, img = cap.read()
-    # print("time:",time.time()-Time1)
-    cv2.imshow("Original",img)
+    Time1=time.time()
+    # success, img = cap.read()
+    # # print("time:",time.time()-Time1)
+    # cv2.imshow("Original",img)
 
 
-    src1 = img.copy()
-    res1 = src1.copy()
-    h, w = res1.shape[:2]
+    # src1 = img.copy()
+    # res1 = src1.copy()
+    # h, w = res1.shape[:2]
     # print("h:",h,"w:,",w)
     # detx1,dety1,move_flag,stop_flag=testdef.findCountours(cap)
-    # detx,dety,move_flag_color_2=testdef.circlePut1(cap)
+    detx,dety,move_flag_color_2=testdef.circlePut1(cap)
     # theta,line_flag,detx,dety,move_flag=testdef.together_line_circle1(cap)
     # a,b,frame,flag_color_1,detx_p,dety_p=findBlockCenter11(cap,2)
     # x_,y_,img_,flag9,detx9,dety9,color = testdef.findBlockCenter_gray(cap)
@@ -61,13 +61,18 @@ while True:
 
     # x_,y_,img_,flag_=testdef.findBlockCenter_circle(cap,1)
     # finaltheta,line_flag=testdef.detectLine(cap)
-    # x_,y_,img_,move_flag_color_1,detx_p,dety_p = testdef.circlePut_color(cap,2)
+    # x_,y_,img_,move_flag_color_1,detx_p,dety_p = testdef.circlePut_color(cap,3)
     # x_,y_,img_,flag1,detx,dety = testdef.findBlockCenter(cap,3)
     # x_center,y_center,flag_color_1,detx_p,dety_p=testdef.findGoodsCenter(cap,1)
 
     # finaltheta,line_flag=testdef.detectLine(cap)
-    theta,line_flag=testdef.detectLine_gray(cap)
+    # theta,line_flag=testdef.detectLine_gray(cap)
+    # theta,line_flag,detx,dety,move_flag=testdef.together_line_circle1(cap)
     # cap.release()
+    print("time:",time.time()-Time1)
+    # timeuart=time.time()
+    # testdef.sendMessage2(ser,detx,dety)
+    # print("time1111111111:",time.time()-timeuart)
     cv2.waitKey(1)    
 
 cap.release()
@@ -92,7 +97,7 @@ cv2.destroyAllWindows()
 # # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3.0)
 # # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1.0)
 # # cap.set(cv2.CAP_PROP_EXPOSURE, 166)
-# # cap.set(cv2.CAP_PROP_BUFFERSIZE, 4)
+# cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 # # cap.set(cv2.CAP_PROP_EXPOSURE, float(0.1)) 
 # # cap.set(cv2.CAP_PROP_EXPOSURE, 10000 * 2**(-12))
 # # cap.set(cv2.CAP_PROP_HUE, 0) 
