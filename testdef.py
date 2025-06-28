@@ -70,9 +70,20 @@ houghradius_max=212
 houghradius_min_6th=209
 houghradius_max_6th=233
 
+#滤波系数
 g_prev_smoothed_circle = None
 g_smooth_factor = 0.25
 g_distance_threshold_factor = 1.0
+
+# #粗调到位阈值（圆+直线）
+# #前后左右
+# limit_position_circle=4
+# #直线斜率
+# limit_position_line=0.5  #所有直线斜率
+
+# #细调到位阈值（圆环-放下物料）
+# limit_ring_1st=50
+# limit_ring_2nd=3
 
 ###########################################################################################
 ###########################################################################################
@@ -350,7 +361,7 @@ def sendMessage6(ser, data):    #发送从右到左颜色（在一条直线三�
 #粗调 直线+圆（findContours 看中间圆环-绿色
 flag_in=0
 cutiaocishu=0
-def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆环-绿色
+def together_line_circle1(cap, limit_position_circle=4, limit_position_line=0.5):  #粗调 直线+圆（findContours 看中间圆环-绿色
     # ret=cap.grab()
     # ret=cap.grab()
     # ret=cap.grab()
@@ -499,7 +510,7 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
     print("hudu:",averageTheta,"   jiaodu:",averageTheta180,"    jiajiao;",finaltheta)
     # cv2.imshow("line",frame)
     line_flag=0
-    if abs(finaltheta)<0.5:
+    if abs(finaltheta)<limit_position_line:
         line_flag=1
     finaltheta=int(round(finaltheta))
     if (finaltheta==90 ):
@@ -549,19 +560,11 @@ def together_line_circle1(cap):  #粗调 直线+圆（findContours 看中间圆�
         dety1=int(round(h/2 - y_g_new - h_g_new/2 -correct_y))
         print("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
 
-    left=-6
-    right=6 #6
-    # print("left:",left,"right:",right)
+
     print("x_incolor:",x_incolor,"y_incolor:",y_incolor)
     print("detx1:",detx1,"dety1:",dety1)
-    # if cutiaocishu % 2 ==0:
-    #     left=-6
-    #     right=6
-    # else:
-    #     left=-2
-    #     right=6
-    det=4
-    if abs(x_incolor)<det and abs(y_incolor)<det:
+    # det=4
+    if abs(x_incolor)<limit_position_circle and abs(y_incolor)<limit_position_circle:
         if x_incolor == 0 and y_incolor==0:
             stop_flag=0
         else:
@@ -2299,7 +2302,7 @@ def detectLine(cap):   #直线检测
     #             cv2.line(res1, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     if not (cnt == 0):
-        averageTheta = 5.0 * sumTheta / cnt #  ýǶȵ ƽ  ֵ
+        averageTheta = 5.0 * sumTheta / cnt #  ýǶȵ ƽ 
         # averageTheta = sumTheta / cnt
         last_theta =  averageTheta
     else :
